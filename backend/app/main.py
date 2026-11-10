@@ -1,11 +1,12 @@
 import logging
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_router
+from app.api.v1.auth import auth_router
 from app.config import get_settings
 from app.db import check_database_connection, engine
 from app.redis_client import check_redis_connection, close_redis_pool
@@ -64,6 +65,7 @@ app.add_middleware(
 
 # Mount API routers
 app.include_router(api_router, prefix="/api/v1")
+app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
 
 
 @app.get("/")
