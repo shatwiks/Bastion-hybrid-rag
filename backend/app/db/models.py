@@ -83,7 +83,7 @@ class DocumentChunk(Base):
         nullable=False,
     )
     allowed_roles: Mapped[List[str]] = mapped_column(
-        ARRAY(String),
+        ARRAY(Text),
         nullable=False,
     )
     embedding: Mapped[Optional[List[float]]] = mapped_column(

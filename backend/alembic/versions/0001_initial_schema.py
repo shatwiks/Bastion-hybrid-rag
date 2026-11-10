@@ -42,7 +42,7 @@ def upgrade() -> None:
         sa.Column("tenant_id", sa.String(length=128), nullable=False),
         sa.Column("section_header", sa.String(length=512), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
-        sa.Column("allowed_roles", postgresql.ARRAY(sa.String()), nullable=False),
+        sa.Column("allowed_roles", postgresql.ARRAY(sa.Text()), nullable=False),
         sa.Column("embedding", pgvector.sqlalchemy.Vector(384), nullable=True),
         sa.Column(
             "tsv_content",
