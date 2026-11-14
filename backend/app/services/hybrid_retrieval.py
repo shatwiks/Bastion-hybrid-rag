@@ -3,7 +3,7 @@ import time
 
 from app.retrievers.base import VectorStoreRetriever
 from app.schemas.auth import SecurityContext
-from app.schemas.retrieval import ChatMessage, HybridRetrievalResult
+from app.schemas.retrieval import ChatMessage, HybridRetrievalResult, QueryRewriteResult
 from app.services.embeddings import EmbeddingService, get_embedding_service
 from app.services.query_rewriter import QueryRewriterService
 
@@ -27,19 +27,26 @@ class HybridRetrievalService:
         query: str,
         chat_history: list[ChatMessage] | None = None,
         top_k: int = 25,
+        rewrite_result: QueryRewriteResult | None = None,
+        query_embedding: list[float] | None = None,
     ) -> HybridRetrievalResult:
         """Rewrite query if multi-turn, embed, and retrieve RBAC-filtered RRF candidates."""
-        rewrite_result = await self.query_rewriter.rewrite(
-            query=query,
-            chat_history=chat_history,
-        )
+        if rewrite_result is None:
+            rewrite_result = await self.query_rewriter.rewrite(
+                query=query,
+                chat_history=chat_history,
+            )
 
-        if not self.embedding_service.is_warmed_up:
-            await asyncio.to_thread(self.embedding_service.warmup)
+        if query_embedding is None:
+            if not self.embedding_service.is_warmed_up:
+                await asyncio.to_thread(self.embedding_service.warmup)
 
-        embed_start = time.perf_counter()
-        query_vec = await self.embedding_service.embed_query(rewrite_result.rewritten_query)
-        embedding_latency_ms = (time.perf_counter() - embed_start) * 1000.0
+            embed_start = time.perf_counter()
+            query_vec = await self.embedding_service.embed_query(rewrite_result.rewritten_query)
+            embedding_latency_ms = (time.perf_counter() - embed_start) * 1000.0
+        else:
+            query_vec = query_embedding
+            embedding_latency_ms = 0.0
 
         retrieval_start = time.perf_counter()
         candidates = await self.retriever.retrieve_hybrid(
