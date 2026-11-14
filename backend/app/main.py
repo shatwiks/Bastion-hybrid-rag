@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -10,6 +11,7 @@ from app.api.v1.auth import auth_router
 from app.config import get_settings
 from app.db import check_database_connection, engine
 from app.redis_client import check_redis_connection, close_redis_pool
+from app.services.embeddings import get_embedding_service
 
 logger = logging.getLogger("rag_engine")
 settings = get_settings()
@@ -31,6 +33,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.info("Redis 8 connection verified via aioredis.")
     else:
         logger.warning("Redis connection check failed during startup.")
+
+    # Pre-warm local embedding model weights before accepting traffic
+    try:
+        embedding_service = get_embedding_service()
+        await asyncio.to_thread(embedding_service.warmup)
+        logger.info("Local EmbeddingService pre-warmed model '%s'.", embedding_service.model_name)
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Failed to pre-warm EmbeddingService: %s", exc)
 
     yield
 
