@@ -7,9 +7,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Document, DocumentChunk
-from app.redis_client import get_redis_client
 from app.schemas.document import DocumentChunkSummary, DocumentIngestResponse
 from app.services.embeddings import EmbeddingService, get_embedding_service
+from app.services.semantic_cache import SemanticCacheService
 from app.services.text_splitter import split_markdown_document
 from app.services.token_expansion import append_search_index_tokens
 
@@ -121,19 +121,9 @@ class IngestionService:
 
     async def _invalidate_tenant_cache(self, tenant_id: str) -> None:
         """Scan and delete Redis semantic cache entries scoped to tenant_id."""
-        redis = get_redis_client()
         try:
-            pattern = f"llm_cache:{tenant_id}:*"
-            cursor = 0
-            while True:
-                cursor, keys = await redis.scan(cursor=cursor, match=pattern, count=100)
-                if keys:
-                    await redis.delete(*keys)
-                if cursor == 0:
-                    break
+            await SemanticCacheService().invalidate_tenant(tenant_id)
         except Exception as exc:  # noqa: BLE001
             logger.warning(
                 "Redis cache invalidation skipped for tenant '%s': %s", tenant_id, exc
             )
-        finally:
-            await redis.aclose()
