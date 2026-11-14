@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any
 
 import pgvector.sqlalchemy
 from sqlalchemy import (
@@ -48,7 +48,7 @@ class Document(Base):
         nullable=False,
     )
 
-    chunks: Mapped[List["DocumentChunk"]] = relationship(
+    chunks: Mapped[list["DocumentChunk"]] = relationship(
         "DocumentChunk",
         back_populates="document",
         cascade="all, delete-orphan",
@@ -82,15 +82,15 @@ class DocumentChunk(Base):
         Text,
         nullable=False,
     )
-    allowed_roles: Mapped[List[str]] = mapped_column(
+    allowed_roles: Mapped[list[str]] = mapped_column(
         ARRAY(Text),
         nullable=False,
     )
-    embedding: Mapped[Optional[List[float]]] = mapped_column(
+    embedding: Mapped[list[float] | None] = mapped_column(
         pgvector.sqlalchemy.Vector(384),
         nullable=True,
     )
-    tsv_content: Mapped[Optional[str]] = mapped_column(
+    tsv_content: Mapped[str | None] = mapped_column(
         TSVECTOR,
         Computed("to_tsvector('simple', content) || to_tsvector('english', content)", persisted=True),
         nullable=True,

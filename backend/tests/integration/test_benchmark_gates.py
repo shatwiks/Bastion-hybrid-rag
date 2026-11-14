@@ -51,10 +51,10 @@ def test_benchmark_lift_and_reduction_formulas() -> None:
     assert compute_hallucination_reduction_pct(0.0, 0.0) == 0.0
 
 
-async def test_comparative_benchmark_ci_gates(warmed_models, db_session) -> None:
+async def test_comparative_benchmark_ci_gates(warmed_models, db_session, tmp_path) -> None:
     """Run live Baseline vs. Enterprise comparison and enforce all 4 production CI gates."""
     emb, reranker = warmed_models
-    report_path = default_benchmark_report_path()
+    report_path = tmp_path / "latest_benchmark.json"
     runner = ComparativeBenchmarkRunner(
         session=db_session,
         embedding_service=emb,
@@ -98,4 +98,12 @@ async def test_comparative_benchmark_ci_gates(warmed_models, db_session) -> None
     assert persisted.enterprise_precision == report.enterprise_precision
     assert persisted.mrr_lift_pct == report.mrr_lift_pct
     assert persisted.hallucination_reduction_pct == report.hallucination_reduction_pct
+
+    # Also verify the tracked evals/reports/latest_benchmark.json artifact validates cleanly
+    tracked_report_path = default_benchmark_report_path()
+    assert tracked_report_path.is_file()
+    tracked_persisted = ComparativeBenchmarkReport.model_validate_json(
+        tracked_report_path.read_text(encoding="utf-8")
+    )
+    assert tracked_persisted.all_gates_passed is True
     assert persisted.rbac_leakage_rate == 0.0

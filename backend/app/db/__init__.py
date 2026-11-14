@@ -13,9 +13,9 @@ __all__ = [
     "Document",
     "DocumentChunk",
     "async_engine",
-    "engine",
     "async_session_maker",
-    "get_db_session",
-    "get_db",
     "check_database_connection",
+    "engine",
+    "get_db",
+    "get_db_session",
 ]

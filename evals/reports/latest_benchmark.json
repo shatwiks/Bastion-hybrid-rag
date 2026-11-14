@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-14T12:55:09.452419+00:00",
+  "generated_at": "2026-11-14T13:02:03.164813+00:00",
   "dataset_counts": {
     "answerable_golden": 17,
     "technical_jargon": 11,
@@ -18,7 +18,7 @@
   "hallucination_reduction_pct": 100.0,
   "baseline_rbac_leakage_rate": 0.0,
   "rbac_leakage_rate": 0.0,
-  "total_duration_ms": 69895.58,
+  "total_duration_ms": 67170.28,
   "gate_thresholds": {
     "min_enterprise_precision": 0.85,
     "min_mrr_lift_pct": 26.0,
@@ -48,8 +48,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9986,
-      "baseline_latency_ms": 120.34,
-      "enterprise_latency_ms": 619.62
+      "baseline_latency_ms": 103.27,
+      "enterprise_latency_ms": 606.5
     },
     {
       "id": "ans-acme-pub-02",
@@ -66,8 +66,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9995,
-      "baseline_latency_ms": 50.16,
-      "enterprise_latency_ms": 542.74
+      "baseline_latency_ms": 54.32,
+      "enterprise_latency_ms": 526.01
     },
     {
       "id": "ans-acme-pub-03",
@@ -84,8 +84,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9977,
-      "baseline_latency_ms": 44.32,
-      "enterprise_latency_ms": 551.07
+      "baseline_latency_ms": 44.08,
+      "enterprise_latency_ms": 545.95
     },
     {
       "id": "ans-acme-sup-01",
@@ -102,8 +102,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9996,
-      "baseline_latency_ms": 47.21,
-      "enterprise_latency_ms": 2348.72
+      "baseline_latency_ms": 44.9,
+      "enterprise_latency_ms": 2058.29
     },
     {
       "id": "ans-acme-sup-02",
@@ -120,8 +120,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9969,
-      "baseline_latency_ms": 55.68,
-      "enterprise_latency_ms": 2127.79
+      "baseline_latency_ms": 61.24,
+      "enterprise_latency_ms": 2275.22
     },
     {
       "id": "ans-acme-sup-03",
@@ -138,8 +138,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9773,
-      "baseline_latency_ms": 45.26,
-      "enterprise_latency_ms": 2219.44
+      "baseline_latency_ms": 55.35,
+      "enterprise_latency_ms": 2227.58
     },
     {
       "id": "ans-acme-sup-04",
@@ -156,8 +156,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9981,
-      "baseline_latency_ms": 56.0,
-      "enterprise_latency_ms": 2132.55
+      "baseline_latency_ms": 56.67,
+      "enterprise_latency_ms": 2169.27
     },
     {
       "id": "ans-acme-exe-01",
@@ -174,8 +174,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9957,
-      "baseline_latency_ms": 50.66,
-      "enterprise_latency_ms": 2617.48
+      "baseline_latency_ms": 47.81,
+      "enterprise_latency_ms": 2547.27
     },
     {
       "id": "ans-acme-exe-02",
@@ -192,8 +192,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9991,
-      "baseline_latency_ms": 61.03,
-      "enterprise_latency_ms": 2548.45
+      "baseline_latency_ms": 49.98,
+      "enterprise_latency_ms": 2576.68
     },
     {
       "id": "ans-globex-pub-01",
@@ -210,8 +210,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9999,
-      "baseline_latency_ms": 47.49,
-      "enterprise_latency_ms": 439.91
+      "baseline_latency_ms": 45.29,
+      "enterprise_latency_ms": 444.24
     },
     {
       "id": "ans-globex-pub-02",
@@ -228,8 +228,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.999,
-      "baseline_latency_ms": 44.74,
-      "enterprise_latency_ms": 396.56
+      "baseline_latency_ms": 49.92,
+      "enterprise_latency_ms": 427.95
     },
     {
       "id": "ans-globex-sup-01",
@@ -246,8 +246,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.994,
-      "baseline_latency_ms": 53.9,
-      "enterprise_latency_ms": 1607.38
+      "baseline_latency_ms": 86.62,
+      "enterprise_latency_ms": 1535.91
     },
     {
       "id": "ans-globex-sup-02",
@@ -264,8 +264,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9927,
-      "baseline_latency_ms": 56.03,
-      "enterprise_latency_ms": 1660.43
+      "baseline_latency_ms": 52.96,
+      "enterprise_latency_ms": 1543.37
     },
     {
       "id": "ans-globex-sup-03",
@@ -282,8 +282,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9715,
-      "baseline_latency_ms": 52.41,
-      "enterprise_latency_ms": 1567.27
+      "baseline_latency_ms": 58.65,
+      "enterprise_latency_ms": 1608.58
     },
     {
       "id": "ans-globex-sup-04",
@@ -300,8 +300,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9925,
-      "baseline_latency_ms": 49.34,
-      "enterprise_latency_ms": 1691.18
+      "baseline_latency_ms": 49.61,
+      "enterprise_latency_ms": 1522.72
     },
     {
       "id": "ans-globex-exe-01",
@@ -318,8 +318,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9962,
-      "baseline_latency_ms": 62.12,
-      "enterprise_latency_ms": 2040.31
+      "baseline_latency_ms": 46.98,
+      "enterprise_latency_ms": 2058.77
     },
     {
       "id": "ans-globex-exe-02",
@@ -336,8 +336,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9973,
-      "baseline_latency_ms": 176.82,
-      "enterprise_latency_ms": 2060.99
+      "baseline_latency_ms": 54.35,
+      "enterprise_latency_ms": 2022.8
     },
     {
       "id": "jargon-01",
@@ -354,8 +354,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.977,
-      "baseline_latency_ms": 43.85,
-      "enterprise_latency_ms": 2599.84
+      "baseline_latency_ms": 49.78,
+      "enterprise_latency_ms": 2569.34
     },
     {
       "id": "jargon-02",
@@ -372,8 +372,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9723,
-      "baseline_latency_ms": 45.48,
-      "enterprise_latency_ms": 2560.11
+      "baseline_latency_ms": 60.71,
+      "enterprise_latency_ms": 2521.71
     },
     {
       "id": "jargon-03",
@@ -390,8 +390,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9748,
-      "baseline_latency_ms": 43.8,
-      "enterprise_latency_ms": 2266.28
+      "baseline_latency_ms": 43.72,
+      "enterprise_latency_ms": 2093.23
     },
     {
       "id": "jargon-04",
@@ -408,8 +408,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9932,
-      "baseline_latency_ms": 89.86,
-      "enterprise_latency_ms": 2179.93
+      "baseline_latency_ms": 76.68,
+      "enterprise_latency_ms": 1999.86
     },
     {
       "id": "jargon-05",
@@ -426,8 +426,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.8477,
-      "baseline_latency_ms": 52.85,
-      "enterprise_latency_ms": 580.51
+      "baseline_latency_ms": 37.71,
+      "enterprise_latency_ms": 547.83
     },
     {
       "id": "jargon-06",
@@ -444,8 +444,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9892,
-      "baseline_latency_ms": 52.56,
-      "enterprise_latency_ms": 1543.55
+      "baseline_latency_ms": 48.63,
+      "enterprise_latency_ms": 1502.05
     },
     {
       "id": "jargon-07",
@@ -462,8 +462,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9913,
-      "baseline_latency_ms": 42.28,
-      "enterprise_latency_ms": 1567.45
+      "baseline_latency_ms": 40.18,
+      "enterprise_latency_ms": 1432.4
     },
     {
       "id": "jargon-08",
@@ -480,8 +480,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.8268,
-      "baseline_latency_ms": 321.07,
-      "enterprise_latency_ms": 2298.06
+      "baseline_latency_ms": 39.88,
+      "enterprise_latency_ms": 1880.63
     },
     {
       "id": "jargon-09",
@@ -498,8 +498,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.8487,
-      "baseline_latency_ms": 52.19,
-      "enterprise_latency_ms": 609.64
+      "baseline_latency_ms": 45.71,
+      "enterprise_latency_ms": 535.02
     },
     {
       "id": "jargon-10",
@@ -516,8 +516,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9744,
-      "baseline_latency_ms": 53.19,
-      "enterprise_latency_ms": 406.02
+      "baseline_latency_ms": 41.77,
+      "enterprise_latency_ms": 390.65
     },
     {
       "id": "jargon-11",
@@ -534,8 +534,8 @@
       "baseline_refused": false,
       "enterprise_refused": false,
       "enterprise_top_rerank_score": 0.9071,
-      "baseline_latency_ms": 40.16,
-      "enterprise_latency_ms": 1448.84
+      "baseline_latency_ms": 46.27,
+      "enterprise_latency_ms": 1416.3
     }
   ],
   "adversarial_cases": [

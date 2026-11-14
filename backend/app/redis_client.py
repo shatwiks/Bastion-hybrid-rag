@@ -1,4 +1,5 @@
 import redis.asyncio as aioredis
+
 from app.config import get_settings
 
 settings = get_settings()
@@ -27,7 +28,7 @@ async def check_redis_connection() -> bool:
     try:
         response = await client.ping()
         return bool(response)
-    except Exception:
+    except Exception:  # noqa: BLE001
         return False
     finally:
         await client.aclose()
