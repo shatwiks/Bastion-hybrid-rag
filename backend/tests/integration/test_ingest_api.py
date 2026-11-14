@@ -10,6 +10,7 @@ from app.db.session import async_engine, async_session_maker
 from app.main import app, lifespan
 from app.redis_client import get_redis_client
 from app.services.embeddings import get_embedding_service
+from app.services.reranker import get_reranker_service
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -293,4 +294,13 @@ async def test_lifespan_prewarms_embedding_service(
     """Application lifespan startup hook ensures EmbeddingService is pre-warmed."""
     async with lifespan(app):
         assert get_embedding_service().is_warmed_up is True
+
+
+@pytest.mark.asyncio
+async def test_lifespan_prewarms_reranker_service(
+    created_doc_ids: list[uuid.UUID],
+) -> None:
+    """Application lifespan startup hook ensures CrossEncoderRerankerService is pre-warmed."""
+    async with lifespan(app):
+        assert get_reranker_service().is_warmed_up is True
 

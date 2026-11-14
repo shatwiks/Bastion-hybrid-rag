@@ -12,6 +12,7 @@ from app.config import get_settings
 from app.db import check_database_connection, engine
 from app.redis_client import check_redis_connection, close_redis_pool
 from app.services.embeddings import get_embedding_service
+from app.services.reranker import get_reranker_service
 
 logger = logging.getLogger("rag_engine")
 settings = get_settings()
@@ -41,6 +42,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.info("Local EmbeddingService pre-warmed model '%s'.", embedding_service.model_name)
     except Exception as exc:  # noqa: BLE001
         logger.error("Failed to pre-warm EmbeddingService: %s", exc)
+
+    # Pre-warm local Cross-Encoder reranker model weights before accepting traffic
+    try:
+        reranker_service = get_reranker_service()
+        await asyncio.to_thread(reranker_service.warmup)
+        logger.info(
+            "Local CrossEncoderRerankerService pre-warmed model '%s'.",
+            reranker_service.model_name,
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Failed to pre-warm CrossEncoderRerankerService: %s", exc)
 
     yield
 
