@@ -99,7 +99,7 @@ def _extract_factual_snippets(content: str) -> list[str]:
                     code_lines.append(joined)
             continue
 
-        if not line or line.startswith("#"):
+        if not line or line.startswith(("#", "Search Index Tokens:")):
             continue
         # Skip markdown table separator rows like | --- | --- |
         if line.startswith("|") and set(line.replace("|", "").replace("-", "").strip()) == set():

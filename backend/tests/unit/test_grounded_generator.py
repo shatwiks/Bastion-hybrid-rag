@@ -148,7 +148,8 @@ async def test_stream_answer_offline_deterministic_includes_inline_chunk_citatio
         0,
         "[Storage Troubleshooting Guide > Resolving ERR_409_CONFLICT]\n"
         "ERR_409_CONFLICT occurs when two sync workers contend on the same lease. "
-        "Inspect lease owner with `acme-storage-cli locks inspect`.",
+        "Inspect lease owner with `acme-storage-cli locks inspect`.\n\n"
+        "Search Index Tokens: ERR-409-CONFLICT ERR_409_CONFLICT err409conflict",
         rerank_score=0.94,
     )
     chunk_b = _make_chunk(
@@ -173,6 +174,7 @@ async def test_stream_answer_offline_deterministic_includes_inline_chunk_citatio
     assert service.last_mode == "offline_deterministic"
     assert f"[{chunk_a.chunk_id}]" in full_answer
     assert "ERR_409_CONFLICT" in full_answer
+    assert "Search Index Tokens:" not in full_answer
     assert service.last_token_usage["total_tokens"] > 0
 
 
