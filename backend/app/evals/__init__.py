@@ -1,3 +1,15 @@
+from app.evals.benchmark_suite import (
+    DEFAULT_TECHNICAL_JARGON_PROBES,
+    AdversarialComparisonCase,
+    BenchmarkGateThresholds,
+    ComparativeBenchmarkReport,
+    ComparativeBenchmarkRunner,
+    RetrievalComparisonCase,
+    TechnicalJargonProbe,
+    compute_hallucination_reduction_pct,
+    compute_mrr_lift_pct,
+    default_benchmark_report_path,
+)
 from app.evals.ragas_runner import (
     AdversarialCaseResult,
     AdversarialRefusalItem,
@@ -12,14 +24,24 @@ from app.evals.ragas_runner import (
 )
 
 __all__ = [
+    "DEFAULT_TECHNICAL_JARGON_PROBES",
     "AdversarialCaseResult",
+    "AdversarialComparisonCase",
     "AdversarialRefusalItem",
     "AnswerableCaseResult",
     "AnswerableGoldenItem",
+    "BenchmarkGateThresholds",
     "Cohort1Report",
     "Cohort2Report",
+    "ComparativeBenchmarkReport",
+    "ComparativeBenchmarkRunner",
     "RagasCohortEvaluator",
+    "RetrievalComparisonCase",
+    "TechnicalJargonProbe",
     "TwoCohortEvaluationReport",
+    "compute_hallucination_reduction_pct",
+    "compute_mrr_lift_pct",
+    "default_benchmark_report_path",
     "load_adversarial_dataset",
     "load_answerable_dataset",
 ]
