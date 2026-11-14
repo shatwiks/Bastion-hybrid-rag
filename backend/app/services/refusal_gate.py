@@ -1,3 +1,5 @@
+import asyncio
+
 from app.config import get_settings
 from app.retrievers.base import RetrievedChunk
 from app.schemas.retrieval import RefusalGateDecision
@@ -42,6 +44,9 @@ class RefusalGateService:
                 all_reranked_chunks=[],
                 rerank_latency_ms=0.0,
             )
+
+        if hasattr(self.reranker, "is_warmed_up") and not self.reranker.is_warmed_up:
+            await asyncio.to_thread(self.reranker.warmup)
 
         reranked, rerank_latency_ms = await self.reranker.rerank(query, candidates)
         if not reranked:
