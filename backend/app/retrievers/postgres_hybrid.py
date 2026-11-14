@@ -5,7 +5,7 @@ from app.retrievers.base import RetrievedChunk
 from app.schemas.auth import SecurityContext
 
 HYBRID_RRF_SQL = text("""
-WITH rbac_pool AS (
+WITH rbac_pool AS NOT MATERIALIZED (
     SELECT
         c.id AS chunk_id,
         c.document_id,
@@ -20,6 +20,28 @@ WITH rbac_pool AS (
     WHERE c.tenant_id = :tenant_id
       AND c.allowed_roles && :user_roles
 ),
+parsed_query AS (
+    SELECT
+        CASE
+            WHEN s_tsq IS NOT NULL AND e_tsq IS NOT NULL THEN s_tsq || e_tsq
+            ELSE COALESCE(s_tsq, e_tsq)
+        END AS tsq
+    FROM (
+        SELECT
+            regexp_replace(
+                NULLIF(plainto_tsquery('simple', :query_text)::text, ''),
+                ' & ',
+                ' | ',
+                'g'
+            )::tsquery AS s_tsq,
+            regexp_replace(
+                NULLIF(plainto_tsquery('english', :query_text)::text, ''),
+                ' & ',
+                ' | ',
+                'g'
+            )::tsquery AS e_tsq
+    ) q
+),
 dense_candidates AS (
     SELECT
         chunk_id,
@@ -31,13 +53,15 @@ dense_candidates AS (
 ),
 sparse_candidates AS (
     SELECT
-        chunk_id,
-        ts_rank_cd(tsv_content, websearch_to_tsquery('english', :query_text)) AS sparse_score,
+        p.chunk_id,
+        ts_rank_cd(p.tsv_content, pq.tsq) AS sparse_score,
         ROW_NUMBER() OVER (
-            ORDER BY ts_rank_cd(tsv_content, websearch_to_tsquery('english', :query_text)) DESC
+            ORDER BY ts_rank_cd(p.tsv_content, pq.tsq) DESC
         ) AS sparse_rank
-    FROM rbac_pool
-    WHERE tsv_content @@ websearch_to_tsquery('english', :query_text)
+    FROM rbac_pool p
+    CROSS JOIN parsed_query pq
+    WHERE pq.tsq IS NOT NULL
+      AND p.tsv_content @@ pq.tsq
     ORDER BY sparse_score DESC
     LIMIT :candidate_pool_size
 ),
