@@ -1,0 +1,249 @@
+{
+  "schema_version": "1.0",
+  "cohort": "answerable_in_scope",
+  "description": "Cohort 1: Curated multi-tenant, multi-persona answerable golden evaluation dataset aligned strictly with the seeded Acme Corp and Globex Corp Markdown knowledge base.",
+  "items": [
+    {
+      "id": "ans-acme-pub-01",
+      "tenant_id": "acme_corp",
+      "persona": "public",
+      "allowed_roles": ["public"],
+      "question": "What are the monthly uptime SLA, target P99 read latency, and durability for Acme Cloud Storage Mission-Critical tier?",
+      "expected_document_title": "Cloud Storage Overview",
+      "expected_keywords": ["99.995%", "18 ms", "11 nines", "us-east-1", "eu-central-1"],
+      "reference_answer": "Acme Cloud Storage Mission-Critical tier guarantees a 99.995% monthly uptime SLA, 18 ms target P99 read latency, and 11 nines cross-region durability across us-east-1 and eu-central-1."
+    },
+    {
+      "id": "ans-acme-pub-02",
+      "tenant_id": "acme_corp",
+      "persona": "public",
+      "allowed_roles": ["public"],
+      "question": "What are the three control and data planes in Acme Cloud Storage Core Architecture?",
+      "expected_document_title": "Cloud Storage Overview",
+      "expected_keywords": [
+        "Edge Ingress Gateway",
+        "Metadata Raft Cluster",
+        "Erasure-Coded Block Store",
+        "TLS 1.3",
+        "Reed-Solomon"
+      ],
+      "reference_answer": "Acme Cloud Storage separates metadata consensus from bulk block persistence across three planes: the Edge Ingress Gateway (TLS 1.3 and OAuth 2.0/JWT validation), the Metadata Raft Cluster (linearizable namespace locks and ACL policies), and the Erasure-Coded Block Store (64 MiB stripes with Reed-Solomon 10+4 parity encoding)."
+    },
+    {
+      "id": "ans-acme-pub-03",
+      "tenant_id": "acme_corp",
+      "persona": "public",
+      "allowed_roles": ["public"],
+      "question": "What HTTP method, endpoint path, and rate limit does Acme Cloud Storage use for Download Object?",
+      "expected_document_title": "Cloud Storage Overview",
+      "expected_keywords": ["GET", "/v2/buckets/{bucket}/objects/{key}", "15,000 req/s"],
+      "reference_answer": "Download Object uses HTTP GET on /v2/buckets/{bucket}/objects/{key} with a rate limit of 15,000 req/s."
+    },
+    {
+      "id": "ans-acme-sup-01",
+      "tenant_id": "acme_corp",
+      "persona": "support_tier_1",
+      "allowed_roles": ["public", "support_tier_1"],
+      "question": "How do I resolve ERR_409_CONFLICT lock contention in Acme Cloud Storage?",
+      "expected_document_title": "Storage Troubleshooting Guide",
+      "expected_keywords": [
+        "ERR_409_CONFLICT",
+        "acme-storage-cli locks inspect",
+        "acme-storage-cli locks release",
+        "30 seconds",
+        "backoff"
+      ],
+      "reference_answer": "ERR_409_CONFLICT occurs when concurrent sync workers contend for an exclusive lease within the 1,500 ms Raft lease window. Inspect the active lease owner using acme-storage-cli locks inspect, force-expire stale leases older than 30 seconds with acme-storage-cli locks release, and resume sync with exponential backoff."
+    },
+    {
+      "id": "ans-acme-sup-02",
+      "tenant_id": "acme_corp",
+      "persona": "support_tier_1",
+      "allowed_roles": ["public", "support_tier_1"],
+      "question": "What causes ERR_503_SERVICE_UNAVAILABLE and how should support mitigate backpressure saturation?",
+      "expected_document_title": "Storage Troubleshooting Guide",
+      "expected_keywords": [
+        "ERR_503_SERVICE_UNAVAILABLE",
+        "85%",
+        "--max-inflight-writes=16",
+        "Retry-After",
+        "120 seconds"
+      ],
+      "reference_answer": "ERR_503_SERVICE_UNAVAILABLE is triggered by ingress backpressure saturation when NVMe write-ahead queues exceed 85% capacity, returning a Retry-After header. Support should check queue depth via acme-storage-cli cluster queue-depth, enable read-only failover or throttle batch sync workers with --max-inflight-writes=16, and drain the overloaded primary shard if saturation persists over 120 seconds."
+    },
+    {
+      "id": "ans-acme-sup-03",
+      "tenant_id": "acme_corp",
+      "persona": "support_tier_1",
+      "allowed_roles": ["public", "support_tier_1"],
+      "question": "What are the raw capacity, max sequential throughput, and dual PSU power draw for SKU-9921-A?",
+      "expected_document_title": "Hardware Inventory Skus",
+      "expected_keywords": ["SKU-9921-A", "368.6 TB", "110 GB/s", "1,180 W", "208V AC"],
+      "reference_answer": "SKU-9921-A is a 2U High-Throughput NVMe JBOF Array with 368.6 TB raw capacity (24 x 15.36 TB PCIe Gen5 NVMe), 110 GB/s max sequential throughput, and a nominal dual PSU power draw of 1,180 W at 208V AC (warning at 1,420 W, critical shutdown at 1,600 W)."
+    },
+    {
+      "id": "ans-acme-sup-04",
+      "tenant_id": "acme_corp",
+      "persona": "support_tier_1",
+      "allowed_roles": ["public", "support_tier_1"],
+      "question": "What CLI command verifies BMC sensor health and firmware baselines on SKU-9921-A?",
+      "expected_document_title": "Hardware Inventory Skus",
+      "expected_keywords": [
+        "acme-hw-ctl inventory verify",
+        "--sku SKU-9921-A",
+        "--check-thermals",
+        "v4.12.0"
+      ],
+      "reference_answer": "Run acme-hw-ctl inventory verify --sku SKU-9921-A --check-thermals --firmware-baseline v4.12.0 to query BMC sensor health and confirm SKU firmware baselines."
+    },
+    {
+      "id": "ans-acme-exe-01",
+      "tenant_id": "acme_corp",
+      "persona": "executive",
+      "allowed_roles": ["public", "support_tier_1", "executive"],
+      "question": "What are the Base Case Bid, Stretch Ceiling, and Walk-Away Cap enterprise values for Project Nimbus?",
+      "expected_document_title": "Q3 Financial Expansion Plan",
+      "expected_keywords": [
+        "Project Nimbus",
+        "$142,000,000",
+        "$165,000,000",
+        "$170,000,000",
+        "6.8x"
+      ],
+      "reference_answer": "In Acme Corp's confidential Project Nimbus M&A financial model (valued at 6.8x forward ARR), the Base Case Bid is $142,000,000, the Stretch Ceiling is $165,000,000, and the Walk-Away Cap is $170,000,000 (rejected by Board)."
+    },
+    {
+      "id": "ans-acme-exe-02",
+      "tenant_id": "acme_corp",
+      "persona": "executive",
+      "allowed_roles": ["public", "support_tier_1", "executive"],
+      "question": "What are Acme Corp's Q3 wholesale colocation commitments in Frankfurt DE-FRA-04 and Tokyo JP-TYO-02?",
+      "expected_document_title": "Q3 Financial Expansion Plan",
+      "expected_keywords": [
+        "DE-FRA-04",
+        "12.0 MW",
+        "$18,450,000",
+        "JP-TYO-02",
+        "8.5 MW",
+        "$14,200,000"
+      ],
+      "reference_answer": "Acme Corp is committing to Frankfurt facility DE-FRA-04 (12.0 MW, $18,450,000 annual lease budget, 7-year term) and Tokyo facility JP-TYO-02 (8.5 MW, $14,200,000 annual lease budget, 5-year term)."
+    },
+    {
+      "id": "ans-globex-pub-01",
+      "tenant_id": "globex_corp",
+      "persona": "public",
+      "allowed_roles": ["public"],
+      "question": "What are the three integrated security modules in Globex Enterprise Threat Defense?",
+      "expected_document_title": "Cybersecurity Suite Intro",
+      "expected_keywords": [
+        "Inline Intrusion Prevention",
+        "Agentless Workload Posture Scanning",
+        "Continuous Compliance Engine",
+        "TLS 1.3",
+        "SOC 2 Type II"
+      ],
+      "reference_answer": "Globex Enterprise Threat Defense integrates three security modules: Inline Intrusion Prevention (IPS) for wire-speed TLS 1.3 inspection, Agentless Workload Posture Scanning for out-of-band CVE and secret drift detection, and the Continuous Compliance Engine mapping firewall telemetry to SOC 2 Type II, ISO 27001, and PCI-DSS 4.0."
+    },
+    {
+      "id": "ans-globex-pub-02",
+      "tenant_id": "globex_corp",
+      "persona": "public",
+      "allowed_roles": ["public"],
+      "question": "Which deployment profiles and compliance attestations does Globex Enterprise Threat Defense support?",
+      "expected_document_title": "Cybersecurity Suite Intro",
+      "expected_keywords": [
+        "Globex-Cloud-Guard",
+        "Globex-Perimeter-IPS",
+        "Globex-Hybrid-Mesh",
+        "FedRAMP",
+        "PCI-DSS 4.0"
+      ],
+      "reference_answer": "Globex supports Globex-Cloud-Guard (AWS, GCP, Azure; SOC 2 Type II and ISO 27001), Globex-Perimeter-IPS (on-premise and colocation; PCI-DSS 4.0 and HIPAA), and Globex-Hybrid-Mesh (multi-cloud and edge; FedRAMP Moderate Ready)."
+    },
+    {
+      "id": "ans-globex-sup-01",
+      "tenant_id": "globex_corp",
+      "persona": "support_tier_1",
+      "allowed_roles": ["public", "support_tier_1"],
+      "question": "What causes ERR_401_SEC_REVOKED on Globex firewalls and what are the resolution steps?",
+      "expected_document_title": "Firewall Error Codes",
+      "expected_keywords": [
+        "ERR_401_SEC_REVOKED",
+        "mTLS",
+        "OCSP",
+        "glx-fw-ctl cert verify",
+        "--strict-egress-filtering"
+      ],
+      "reference_answer": "ERR_401_SEC_REVOKED is triggered when an invalid or revoked egress mTLS client certificate fails OCSP/CRL validation during the policy handshake. Resolve it by running glx-fw-ctl cert verify --tenant-id globex_corp --error-code ERR_401_SEC_REVOKED --strict-egress-filtering, rotating the gateway certificate bundle, and verifying OCSP responder reachability."
+    },
+    {
+      "id": "ans-globex-sup-02",
+      "tenant_id": "globex_corp",
+      "persona": "support_tier_1",
+      "allowed_roles": ["public", "support_tier_1"],
+      "question": "How is the --enable-read-replica flag used with glx-fw-ctl daemon start for firewall policy sync failover?",
+      "expected_document_title": "Firewall Error Codes",
+      "expected_keywords": [
+        "--enable-read-replica",
+        "glx-fw-ctl daemon start",
+        "--strict-egress-filtering",
+        "2s",
+        "ERR_502_REPLICA_DESYNC"
+      ],
+      "reference_answer": "During primary policy-controller maintenance or ERR_502_REPLICA_DESYNC recovery, run glx-fw-ctl daemon start --enable-read-replica --strict-egress-filtering --replica-sync-interval 2s so edge gateways perform local read-replica policy lookups."
+    },
+    {
+      "id": "ans-globex-sup-03",
+      "tenant_id": "globex_corp",
+      "persona": "support_tier_1",
+      "allowed_roles": ["public", "support_tier_1"],
+      "question": "What are the inspected TLS throughput, concurrent sessions, network interfaces, and power supply specs for SKU-GLX-500?",
+      "expected_document_title": "Appliance Skus",
+      "expected_keywords": ["SKU-GLX-500", "200 Gbps", "40,000,000", "8 x 100GbE", "1,200W"],
+      "reference_answer": "SKU-GLX-500 is a 2U Carrier-Grade Threat Gate supporting 200 Gbps inspected TLS throughput, 40,000,000 concurrent sessions, 8 x 100GbE QSFP28 plus 4 x 25GbE SFP28 interfaces, and dual 1,200W Platinum AC/DC hot-swap power supplies (780W typical load)."
+    },
+    {
+      "id": "ans-globex-sup-04",
+      "tenant_id": "globex_corp",
+      "persona": "support_tier_1",
+      "allowed_roles": ["public", "support_tier_1"],
+      "question": "What are the throughput, power supply, and cooling specs for the SKU-GLX-100 Edge Sensor?",
+      "expected_document_title": "Appliance Skus",
+      "expected_keywords": ["SKU-GLX-100", "10 Gbps", "1,500,000", "250W", "38 dBA"],
+      "reference_answer": "The SKU-GLX-100 Edge Sensor provides 10 Gbps inspected TLS throughput, 1,500,000 concurrent sessions, a single 250W internal AC power supply (95W typical load) with external DC failover, and front-to-back PWM cooling rated at 38 dBA nominal."
+    },
+    {
+      "id": "ans-globex-exe-01",
+      "tenant_id": "globex_corp",
+      "persona": "executive",
+      "allowed_roles": ["public", "support_tier_1", "executive"],
+      "question": "What are Globex Corp's initial offer, board max ceiling, and deal structure for TARGET-AEGIS-7?",
+      "expected_document_title": "Acquisition Targets Q4",
+      "expected_keywords": [
+        "TARGET-AEGIS-7",
+        "$210,000,000",
+        "$245,000,000",
+        "75% Cash / 25% Equity",
+        "$12,500,000"
+      ],
+      "reference_answer": "For TARGET-AEGIS-7 (Cloud Identity & CIEM), Globex Corp's initial offer is $210,000,000 with a board max ceiling of $245,000,000 under a 75% Cash / 25% Equity deal structure, and legal counsel is authorized to include a $12,500,000 reverse break-up fee."
+    },
+    {
+      "id": "ans-globex-exe-02",
+      "tenant_id": "globex_corp",
+      "persona": "executive",
+      "allowed_roles": ["public", "support_tier_1", "executive"],
+      "question": "What does Globex Executive Board Directive BOARD-DIR-Q4-09 specify for escrow commitment and TARGET-SENTINEL-X?",
+      "expected_document_title": "Acquisition Targets Q4",
+      "expected_keywords": [
+        "BOARD-DIR-Q4-09",
+        "310000000",
+        "TARGET-SENTINEL-X",
+        "SKU-GLX-100",
+        "90 days"
+      ],
+      "reference_answer": "BOARD-DIR-Q4-09 authorizes a $310,000,000 USD escrow commitment restricted to executive clean-room access and mandates retiring all legacy branch probes in favor of SKU-GLX-100 appliances within 90 days of closing TARGET-SENTINEL-X."
+    }
+  ]
+}
