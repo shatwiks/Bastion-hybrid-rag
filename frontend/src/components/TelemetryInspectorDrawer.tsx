@@ -3,24 +3,9 @@
 import React, { useMemo, useState } from "react";
 import {
   Activity,
-  AlertTriangle,
-  ArrowRight,
-  CheckCircle2,
   ChevronDown,
   ChevronRight,
-  Clock,
-  Cpu,
-  DatabaseZap,
-  Filter,
-  GitCompare,
-  KeyRound,
-  Lock,
   PanelRightClose,
-  ShieldAlert,
-  ShieldCheck,
-  SkipForward,
-  Sparkles,
-  Zap,
 } from "lucide-react";
 
 import type {
@@ -41,63 +26,78 @@ const STAGE_DEFINITIONS: Array<{
   {
     step: 1,
     name: "auth_guardrail",
-    title: "Step 1: Auth & Pre-Retrieval RBAC Guardrail",
+    title: "Auth & Pre-Retrieval RBAC",
   },
   {
     step: 2,
     name: "semantic_cache",
-    title: "Step 2: Permission-Scoped Redis Semantic Cache",
+    title: "Permission-Scoped Redis Cache",
   },
   {
     step: 3,
     name: "hybrid_retrieval",
-    title: "Step 3: Query Rewrite & Hybrid Retrieval (BM25 + pgvector RRF)",
+    title: "Query Rewrite & Hybrid RRF",
   },
   {
     step: 4,
     name: "rerank_gate",
-    title: "Step 4: Cross-Encoder Reranking & Deterministic Refusal Gate",
+    title: "Cross-Encoder & Refusal Gate",
   },
   {
     step: 5,
     name: "grounded_generation",
-    title: "Step 5: Grounded LLM Generation",
+    title: "Grounded Generation",
   },
   {
     step: 6,
     name: "telemetry_commit",
-    title: "Step 6: Async Langfuse Trace & Cache Commit",
+    title: "Langfuse Trace & Cache Commit",
   },
 ];
 
-const STATUS_STYLES: Record<
+const STATUS_META: Record<
   PipelineStepStatus,
-  { label: string; badgeClass: string; dotClass: string }
+  { label: string; textColor: string; bgColor: string; borderColor: string; numBg: string; numInk: string }
 > = {
   pending: {
-    label: "pending",
-    badgeClass: "border-slate-700 bg-slate-800/80 text-slate-400",
-    dotClass: "bg-slate-500",
+    label: "Pending",
+    textColor: "var(--ink-muted)",
+    bgColor: "transparent",
+    borderColor: "var(--rule)",
+    numBg: "var(--mineral)",
+    numInk: "var(--ink-secondary)",
   },
   running: {
-    label: "running",
-    badgeClass: "border-indigo-500/40 bg-indigo-500/15 text-indigo-300",
-    dotClass: "bg-indigo-400 animate-ping",
+    label: "Running",
+    textColor: "var(--copper)",
+    bgColor: "var(--copper-soft)",
+    borderColor: "var(--copper-rule)",
+    numBg: "var(--copper)",
+    numInk: "#FCFBF8",
   },
   completed: {
-    label: "completed",
-    badgeClass: "border-emerald-500/40 bg-emerald-500/15 text-emerald-300",
-    dotClass: "bg-emerald-400",
+    label: "Completed",
+    textColor: "var(--jade)",
+    bgColor: "var(--jade-soft)",
+    borderColor: "var(--jade-rule)",
+    numBg: "var(--jade)",
+    numInk: "#FCFBF8",
   },
   short_circuited: {
-    label: "short_circuited",
-    badgeClass: "border-amber-500/45 bg-amber-500/15 text-amber-200",
-    dotClass: "bg-amber-400",
+    label: "Blocked",
+    textColor: "var(--crimson)",
+    bgColor: "var(--crimson-soft)",
+    borderColor: "var(--crimson-rule)",
+    numBg: "var(--crimson)",
+    numInk: "#FCFBF8",
   },
   skipped: {
-    label: "skipped",
-    badgeClass: "border-slate-700/80 bg-slate-900 text-slate-500",
-    dotClass: "bg-slate-600",
+    label: "Skipped",
+    textColor: "var(--ink-muted)",
+    bgColor: "var(--mineral)",
+    borderColor: "var(--rule)",
+    numBg: "var(--mineral)",
+    numInk: "var(--ink-muted)",
   },
 };
 
@@ -159,534 +159,509 @@ export function TelemetryInspectorDrawer({
       ? step4.details.top_rerank_score
       : turn?.refusal?.top_score ?? null;
 
-  const totalRrfCandidates =
-    typeof step3?.details.candidate_count === "number"
-      ? step3.details.candidate_count
-      : funnelRows.length;
+  const scorePct =
+    topRerankScore !== null
+      ? Math.max(0, Math.min(100, topRerankScore * 100))
+      : 0;
+  const thresholdPct = Math.max(0, Math.min(100, threshold * 100));
+  const passesGate =
+    topRerankScore !== null &&
+    topRerankScore >= threshold &&
+    !turn?.refusal?.refused;
 
-  const selectedTopCount =
-    typeof step4?.details.selected_count === "number"
-      ? step4.details.selected_count
-      : turn?.citations.length ?? 0;
+  const originalQuery =
+    typeof step3?.details.original_query === "string"
+      ? step3.details.original_query
+      : turn?.query ?? "";
+  const rewrittenQuery =
+    typeof step3?.details.rewritten_query === "string"
+      ? step3.details.rewritten_query
+      : "";
+  const wasRewritten =
+    Boolean(step3?.details.was_rewritten) &&
+    rewrittenQuery.length > 0 &&
+    rewrittenQuery !== originalQuery;
+  const preservedTokens = Array.isArray(step3?.details.preserved_tokens)
+    ? (step3.details.preserved_tokens as string[])
+    : [];
 
-  if (!isOpen) {
-    return null;
-  }
+  const cacheHit = Boolean(step2?.details.cache_hit ?? turn?.cacheHit);
+  const cacheBypassed = Boolean(step2?.details.bypass_cache);
+  const cacheSimilarity =
+    typeof step2?.details.similarity_score === "number"
+      ? step2.details.similarity_score
+      : turn?.cacheSimilarity ?? null;
+  const entityFingerprint =
+    typeof step2?.details.entity_fingerprint === "string"
+      ? step2.details.entity_fingerprint
+      : null;
+
+  if (!isOpen) return null;
 
   return (
     <aside
       aria-label="6-Step Pipeline Telemetry Inspector"
-      className="flex h-full min-h-[540px] min-w-0 flex-col rounded-2xl border border-slate-800/90 bg-slate-900/70 shadow-xl overflow-hidden"
+      className="flex h-full min-h-[540px] min-w-0 flex-col bg-[var(--ground)]"
     >
-      {/* Drawer Header */}
-      <div className="flex items-center justify-between gap-3 border-b border-slate-800/90 bg-slate-900/95 px-4 py-3">
+      {/* Inspector Header */}
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--rule)] px-5 py-3.5">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-cyan-400 shrink-0" />
-            <h2 className="truncate text-sm font-semibold text-white">
-              6-Step Pipeline Telemetry Inspector
+            <Activity className="h-4 w-4 shrink-0 text-[var(--copper)]" />
+            <h2 className="truncate text-sm font-semibold text-[var(--ink)]">
+              6-Step Pipeline Telemetry
             </h2>
           </div>
-          <p className="mt-0.5 truncate text-[11px] text-slate-400">
+          <p className="mt-0.5 truncate font-mono text-[11px] text-[var(--ink-muted)]">
             {turn
-              ? `Inspecting query · ${turn.tenant_id} / ${turn.persona}`
-              : "Submit a query to trace live RBAC, RRF & Cross-Encoder telemetry"}
+              ? `${turn.tenant_id} / ${turn.persona}`
+              : session
+              ? `Ready · ${session.tenant_id} / ${session.persona}`
+              : "Awaiting security context"}
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          {turn?.totalLatencyMs != null && (
-            <span className="inline-flex items-center gap-1 rounded-md border border-slate-700 bg-slate-950 px-2 py-1 font-mono text-[11px] font-semibold text-cyan-300">
-              <Clock className="h-3 w-3 text-cyan-400" />
+        <div className="flex shrink-0 items-center gap-2">
+          {typeof turn?.totalLatencyMs === "number" && (
+            <span className="rounded border border-[var(--rule)] bg-[var(--paper)] px-2 py-0.5 font-mono text-[11px] tabular-nums font-medium text-[var(--ink)]">
               {turn.totalLatencyMs.toFixed(1)} ms
             </span>
           )}
           <button
             type="button"
             onClick={onCollapse}
-            aria-label="Collapse Telemetry Inspector"
-            title="Collapse Telemetry Inspector"
-            className="rounded-lg border border-slate-700/80 bg-slate-800/80 p-1.5 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
+            aria-label="Collapse telemetry inspector drawer"
+            title="Collapse Inspector"
+            className="rounded border border-[var(--rule)] bg-[var(--paper)] p-1.5 text-[var(--ink-secondary)] transition-colors hover:border-[var(--rule-strong)] hover:text-[var(--ink)] cursor-pointer"
           >
-            <PanelRightClose className="h-4 w-4" />
+            <PanelRightClose className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Scrollable Inspector Body */}
-      <div className="flex-1 min-w-0 overflow-y-auto p-4 space-y-3">
-        {!turn ? (
-          <div className="flex h-full min-h-[320px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-800 bg-slate-950/40 p-6 text-center">
-            <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
-              <DatabaseZap className="h-5 w-5" />
-            </div>
-            <h3 className="text-sm font-semibold text-slate-200">
-              No Pipeline Execution Selected
-            </h3>
-            <p className="mt-1 max-w-sm text-xs leading-relaxed text-slate-400">
-              Launch a scenario or ask a question in the chat pane to inspect live
-              step latencies, Redis cache similarity, rewritten query diff, and the
-              0.65 Refusal Gate score meter.
-            </p>
-            {session && (
-              <div className="mt-4 rounded-lg border border-slate-800 bg-slate-900/90 px-3 py-2 text-left font-mono text-[11px] text-slate-300">
-                <div>
-                  <span className="text-slate-500">tenant_id:</span>{" "}
-                  {session.tenant_id}
+      {/* Scrollable Telemetry Rail */}
+      <div className="min-w-0 flex-1 overflow-y-auto px-5 py-4">
+        {/* 6-Step Hairline Transit Rail */}
+        <ol className="divide-y divide-[var(--rule)] border-t border-b border-[var(--rule)]">
+          {STAGE_DEFINITIONS.map((stage) => {
+            const liveStep = stepMap.get(stage.step);
+            const status: PipelineStepStatus = liveStep?.status ?? "pending";
+            const isStep2CacheHit =
+              stage.step === 2 && status === "short_circuited" && cacheHit;
+            const style = isStep2CacheHit
+              ? {
+                  ...STATUS_META.completed,
+                  label: "Cache Hit",
+                }
+              : STATUS_META[status];
+
+            return (
+              <li key={stage.step} className="py-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <span
+                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-xs font-mono text-[11px] font-semibold tabular-nums"
+                      style={{
+                        backgroundColor: style.numBg,
+                        color: style.numInk,
+                      }}
+                    >
+                      {stage.step}
+                    </span>
+                    <span className="truncate text-[13px] font-semibold text-[var(--ink)]">
+                      {stage.title}
+                    </span>
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-2">
+                    {typeof liveStep?.latency_ms === "number" && (
+                      <span className="font-mono text-[11px] tabular-nums text-[var(--ink-muted)]">
+                        {liveStep.latency_ms.toFixed(1)} ms
+                      </span>
+                    )}
+                    <span
+                      className="rounded-xs border px-1.5 py-0.5 text-[10.5px] font-medium"
+                      style={{
+                        color: style.textColor,
+                        backgroundColor: style.bgColor,
+                        borderColor: style.borderColor,
+                      }}
+                    >
+                      {style.label}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-slate-500">allowed_roles:</span>{" "}
-                  {session.allowed_roles.join(", ")}
-                </div>
-                <div>
-                  <span className="text-slate-500">scope_hash:</span>{" "}
-                  {session.scope_hash}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <>
-            {/* 6-Step Lifecycle Cards */}
-            <div className="space-y-2.5">
-              {STAGE_DEFINITIONS.map((def) => {
-                const step = stepMap.get(def.step);
-                const status: PipelineStepStatus = step?.status ?? "pending";
-                const statusMeta = STATUS_STYLES[status];
-                const latency = step?.latency_ms ?? 0;
 
-                return (
-                  <div
-                    key={def.step}
-                    className={`rounded-xl border p-3 transition-colors ${
-                      status === "running"
-                        ? "border-indigo-500/50 bg-indigo-950/20"
-                        : status === "short_circuited"
-                        ? "border-amber-500/45 bg-amber-950/15"
-                        : status === "skipped"
-                        ? "border-slate-800/70 bg-slate-950/40 opacity-75"
-                        : "border-slate-800 bg-slate-950/70"
-                    }`}
-                  >
-                    {/* Stage Header */}
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-800 font-mono text-[11px] font-bold text-slate-200 border border-slate-700">
-                          {def.step}
-                        </span>
-                        <span className="truncate text-xs font-semibold text-slate-100">
-                          {def.title}
-                        </span>
-                      </div>
+                {/* Step 1 Details */}
+                {stage.step === 1 && (step1 || session) && (
+                  <div className="mt-2 ml-7.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-[var(--ink-secondary)]">
+                    <span>
+                      tenant:{" "}
+                      <strong className="font-medium text-[var(--ink)]">
+                        {String(step1?.details.tenant_id ?? session?.tenant_id ?? "—")}
+                      </strong>
+                    </span>
+                    <span>
+                      roles:{" "}
+                      <strong className="font-medium text-[var(--ink)]">
+                        {(
+                          (step1?.details.allowed_roles as string[] | undefined) ??
+                          session?.allowed_roles ??
+                          []
+                        ).join(", ")}
+                      </strong>
+                    </span>
+                    <span className="truncate text-[var(--ink-muted)]">
+                      hash:{" "}
+                      {String(step1?.details.scope_hash ?? session?.scope_hash ?? "—")}
+                    </span>
+                  </div>
+                )}
 
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="font-mono text-[11px] text-slate-400">
-                          {step ? `${latency.toFixed(1)} ms` : "—"}
-                        </span>
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase ${statusMeta.badgeClass}`}
-                        >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${statusMeta.dotClass}`}
-                          />
-                          {statusMeta.label}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Stage-Specific Details */}
-                    {def.step === 1 && step1 && (
-                      <div className="mt-2.5 grid grid-cols-1 gap-1.5 border-t border-slate-800/80 pt-2 text-[11px]">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="inline-flex items-center gap-1 text-slate-400">
-                            <Lock className="h-3 w-3 text-emerald-400" />
-                            tenant_id:
-                            <span className="font-mono text-slate-200">
-                              {step1.details.tenant_id ?? turn.tenant_id}
-                            </span>
-                          </span>
-                          <span className="inline-flex items-center gap-1 font-mono text-cyan-300">
-                            <KeyRound className="h-3 w-3 text-cyan-400" />
-                            scope_hash:{" "}
-                            {step1.details.scope_hash ?? turn.scope_hash}
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-1">
-                          <span className="text-slate-400 mr-1">allowed_roles:</span>
-                          {(
-                            step1.details.allowed_roles ?? turn.allowed_roles
-                          ).map((role) => (
-                            <span
-                              key={role}
-                              className="rounded border border-slate-700 bg-slate-900 px-1.5 py-0.5 font-mono text-[10px] text-indigo-200"
-                            >
-                              {role}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {def.step === 2 && step2 && (
-                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-2 text-[11px]">
-                        <div className="flex items-center gap-2">
-                          {step2.details.cache_hit ? (
-                            <span className="inline-flex items-center gap-1 rounded border border-emerald-500/40 bg-emerald-500/15 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-300">
-                              <Zap className="h-3 w-3" />
-                              HIT
-                            </span>
-                          ) : step2.details.bypassed ? (
-                            <span className="inline-flex items-center gap-1 rounded border border-slate-600 bg-slate-800 px-2 py-0.5 font-mono text-[10px] font-bold text-slate-300">
-                              <SkipForward className="h-3 w-3" />
-                              BYPASSED
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 rounded border border-slate-700 bg-slate-800/90 px-2 py-0.5 font-mono text-[10px] font-bold text-slate-300">
-                              MISS
-                            </span>
-                          )}
-                          <span className="text-slate-400">
-                            Cosine Similarity:{" "}
-                            <span className="font-mono text-slate-200">
-                              {typeof step2.details.similarity_score === "number"
-                                ? step2.details.similarity_score.toFixed(4)
-                                : "0.0000"}
-                            </span>
-                          </span>
-                        </div>
-                        <span className="font-mono text-[10px] text-slate-400">
-                          entity_fingerprint:{" "}
-                          <span className="text-cyan-300">
-                            {step2.details.entity_fingerprint ?? "none"}
-                          </span>
-                        </span>
-                      </div>
-                    )}
-
-                    {def.step === 3 && step3 && (
-                      <div className="mt-2.5 space-y-2 border-t border-slate-800/80 pt-2 text-[11px]">
-                        {step3.status === "skipped" ? (
-                          <p className="text-slate-400 italic">
-                            Skipped ({step3.details.reason ?? "semantic_cache_hit"})
-                          </p>
-                        ) : (
-                          <>
-                            <div className="grid grid-cols-1 gap-1.5 rounded-lg border border-slate-800 bg-slate-900/70 p-2">
-                              <div className="flex items-start gap-1.5">
-                                <span className="shrink-0 rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-400">
-                                  Original
-                                </span>
-                                <span className="text-slate-300 break-words">
-                                  {step3.details.original_query ?? turn.query}
-                                </span>
-                              </div>
-                              <div className="flex items-start gap-1.5">
-                                <span className="inline-flex shrink-0 items-center gap-1 rounded bg-indigo-500/15 border border-indigo-500/30 px-1.5 py-0.5 font-mono text-[10px] text-indigo-300">
-                                  <ArrowRight className="h-2.5 w-2.5" />
-                                  Rewritten
-                                </span>
-                                <span className="text-indigo-100 break-words">
-                                  {step3.details.rewritten_query ?? turn.query}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-wrap items-center justify-between gap-2">
-                              <span className="inline-flex items-center gap-1 text-slate-400">
-                                <Filter className="h-3 w-3 text-sky-400" />
-                                Candidate Pool:{" "}
-                                <strong className="font-mono text-slate-200">
-                                  {step3.details.candidate_count ?? funnelRows.length}
-                                </strong>{" "}
-                                chunks (Top-25 RRF)
-                              </span>
-                              {Array.isArray(step3.details.preserved_tokens) &&
-                                step3.details.preserved_tokens.length > 0 && (
-                                  <div className="flex flex-wrap items-center gap-1">
-                                    <span className="text-slate-500">Preserved:</span>
-                                    {step3.details.preserved_tokens.map((tok) => (
-                                      <span
-                                        key={tok}
-                                        className="rounded border border-cyan-500/30 bg-cyan-500/10 px-1.5 py-0.5 font-mono text-[10px] text-cyan-300"
-                                      >
-                                        {tok}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    )}
-
-                    {def.step === 4 && step4 && (
-                      <div className="mt-2.5 space-y-2 border-t border-slate-800/80 pt-2 text-[11px]">
-                        {step4.status === "skipped" ? (
-                          <p className="text-slate-400 italic">
-                            Skipped ({step4.details.reason ?? "semantic_cache_hit"})
-                          </p>
-                        ) : (
-                          <div className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/75 p-2.5">
-                            <div className="flex flex-wrap items-center justify-between gap-2">
-                              <span className="inline-flex items-center gap-1.5 font-semibold text-slate-200">
-                                <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-                                Refusal Gate Confidence Meter
-                              </span>
-                              {topRerankScore !== null && (
-                                <span
-                                  className={`inline-flex items-center gap-1 rounded px-2 py-0.5 font-mono text-[11px] font-bold ${
-                                    topRerankScore >= threshold
-                                      ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-                                      : "bg-rose-500/15 text-rose-300 border border-rose-500/40"
-                                  }`}
-                                >
-                                  {topRerankScore >= threshold ? (
-                                    <ShieldCheck className="h-3 w-3" />
-                                  ) : (
-                                    <ShieldAlert className="h-3 w-3" />
-                                  )}
-                                  {topRerankScore.toFixed(4)} vs {threshold.toFixed(2)} Gate
-                                </span>
-                              )}
-                            </div>
-
-                            {topRerankScore !== null && (
-                              <>
-                                <div className="relative h-3.5 w-full overflow-hidden rounded-full bg-slate-800">
-                                  <div
-                                    className={`h-full rounded-full transition-all duration-300 ${
-                                      topRerankScore >= threshold
-                                        ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
-                                        : "bg-gradient-to-r from-rose-600 to-amber-500"
-                                    }`}
-                                    style={{
-                                      width: `${Math.max(
-                                        0,
-                                        Math.min(100, topRerankScore * 100)
-                                      )}%`,
-                                    }}
-                                  />
-                                  {/* 0.65 Threshold Marker */}
-                                  <div
-                                    className="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]"
-                                    style={{ left: `${threshold * 100}%` }}
-                                    title={`Refusal Gate Threshold: ${threshold.toFixed(2)}`}
-                                  />
-                                </div>
-                                <div className="flex items-center justify-between font-mono text-[10px] text-slate-400">
-                                  <span>0.00</span>
-                                  <span className="text-amber-300 font-semibold">
-                                    Threshold: {threshold.toFixed(2)} Refusal Gate
-                                  </span>
-                                  <span>1.00</span>
-                                </div>
-                              </>
-                            )}
-
-                            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
-                              <span>
-                                Funnel:{" "}
-                                <strong className="font-mono text-slate-200">
-                                  Top-{totalRrfCandidates}
-                                </strong>{" "}
-                                →{" "}
-                                <strong className="font-mono text-slate-200">
-                                  Top-{selectedTopCount}
-                                </strong>
-                              </span>
-                              {step4.details.should_refuse && (
-                                <span className="inline-flex items-center gap-1 text-rose-300 font-medium">
-                                  <AlertTriangle className="h-3 w-3" />
-                                  {step4.details.refusal_reason ?? "below_confidence_threshold"}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {def.step === 5 && step5 && (
-                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-2 text-[11px]">
-                        <span className="inline-flex items-center gap-1.5 text-slate-300">
-                          <Cpu className="h-3.5 w-3.5 text-indigo-400" />
-                          llm_called:{" "}
-                          <strong
-                            className={`font-mono ${
-                              step5.details.llm_called
-                                ? "text-emerald-300"
-                                : "text-amber-300"
-                            }`}
-                          >
-                            {step5.details.llm_called ? "TRUE" : "FALSE"}
-                          </strong>
-                        </span>
-                        <span className="text-slate-400">
-                          Cited Chunks:{" "}
-                          <strong className="font-mono text-slate-200">
-                            {Array.isArray(step5.details.selected_chunk_ids)
-                              ? step5.details.selected_chunk_ids.length
-                              : turn.citations.length}
-                          </strong>
-                          {step5.details.model ? ` · ${step5.details.model}` : ""}
-                        </span>
-                      </div>
-                    )}
-
-                    {def.step === 6 && step6 && (
-                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-2 text-[11px]">
-                        <span className="font-mono text-slate-300 truncate max-w-[230px]">
-                          trace_id:{" "}
-                          <span className="text-cyan-300">
-                            {step6.details.trace_id ?? turn.traceId ?? "—"}
-                          </span>
-                        </span>
-                        <span className="font-mono text-slate-400">
-                          total:{" "}
-                          <strong className="text-slate-200">
-                            {turn.totalLatencyMs !== null
-                              ? `${turn.totalLatencyMs.toFixed(1)} ms`
-                              : "—"}
-                          </strong>
-                        </span>
-                      </div>
+                {/* Step 2 Details */}
+                {stage.step === 2 && step2 && (
+                  <div className="mt-2 ml-7.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                    <span
+                      className="rounded-xs border px-1.5 py-0.5 font-mono text-[10.5px] font-semibold"
+                      style={
+                        cacheHit
+                          ? {
+                              color: "var(--jade)",
+                              backgroundColor: "var(--jade-soft)",
+                              borderColor: "var(--jade-rule)",
+                            }
+                          : {
+                              color: "var(--ink-secondary)",
+                              backgroundColor: "var(--paper)",
+                              borderColor: "var(--rule)",
+                            }
+                      }
+                    >
+                      {cacheHit ? "HIT" : cacheBypassed ? "BYPASSED" : "MISS"}
+                    </span>
+                    <span className="font-mono text-[11px] tabular-nums text-[var(--ink-secondary)]">
+                      sim:{" "}
+                      <strong className="text-[var(--ink)]">
+                        {cacheSimilarity !== null
+                          ? cacheSimilarity.toFixed(4)
+                          : "0.0000"}
+                      </strong>
+                    </span>
+                    {entityFingerprint && (
+                      <span className="truncate font-mono text-[11px] text-[var(--ink-muted)]">
+                        fp: {entityFingerprint}
+                      </span>
                     )}
                   </div>
-                );
-              })}
-            </div>
+                )}
 
-            {/* Candidate Funnel Comparison Table (Top-25 RRF -> Top-5 Cross-Encoder) */}
-            <div className="min-w-0 max-w-full rounded-xl border border-slate-800 bg-slate-950/75 overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setFunnelExpanded((prev) => !prev)}
-                className="flex w-full items-center justify-between gap-2 bg-slate-900/90 px-3.5 py-2.5 text-left hover:bg-slate-800/80 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  {funnelExpanded ? (
-                    <ChevronDown className="h-4 w-4 text-slate-400 shrink-0" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 text-slate-400 shrink-0" />
-                  )}
-                  <GitCompare className="h-4 w-4 text-cyan-400 shrink-0" />
-                  <span className="truncate text-xs font-semibold text-slate-100">
-                    Candidate Funnel (Top-{totalRrfCandidates || 25} RRF → Top-
-                    {selectedTopCount || 5} Cross-Encoder)
-                  </span>
-                </div>
-                <span className="shrink-0 rounded bg-slate-800 px-2 py-0.5 font-mono text-[10px] text-slate-300">
-                  {funnelRows.length} rows
-                </span>
-              </button>
-
-              {funnelExpanded && (
-                <div className="border-t border-slate-800/80">
-                  {funnelRows.length === 0 ? (
-                    <div className="px-4 py-5 text-center text-xs text-slate-400">
-                      {step2?.details.cache_hit
-                        ? "Semantic Cache HIT short-circuited Step 3 & Step 4 (0 vector/rerank candidates needed)."
-                        : "Awaiting hybrid retrieval candidate pool..."}
-                    </div>
-                  ) : (
-                    <>
-                      <div className="w-full max-w-full overflow-x-auto">
-                        <table className="w-full border-collapse text-left text-[11px]">
-                          <thead>
-                            <tr className="border-b border-slate-800 bg-slate-900/60 font-mono text-[10px] uppercase tracking-wider text-slate-400">
-                              <th className="px-3 py-2">Section Header</th>
-                              <th className="px-2 py-2 text-right">Dense #</th>
-                              <th className="px-2 py-2 text-right">BM25 #</th>
-                              <th className="px-2 py-2 text-right">RRF Score</th>
-                              <th className="px-2 py-2 text-right">Cross-Enc</th>
-                              <th className="px-3 py-2 text-center">Gate (≥0.65)</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-800/70">
-                            {visibleFunnelRows.map((row) => {
-                              const hasRerank = typeof row.rerank_score === "number";
-                              const passed =
-                                hasRerank && (row.rerank_score ?? 0) >= threshold;
-
-                              return (
-                                <tr
-                                  key={row.chunk_id}
-                                  className="hover:bg-slate-900/50 transition-colors"
-                                >
-                                  <td className="px-3 py-2 max-w-[170px]">
-                                    <div className="truncate font-medium text-slate-200">
-                                      {row.section_header || "Document Root"}
-                                    </div>
-                                    <div className="truncate font-mono text-[10px] text-slate-500">
-                                      {row.document_title}
-                                    </div>
-                                  </td>
-                                  <td className="px-2 py-2 text-right font-mono text-sky-300">
-                                    {row.dense_rank != null ? `#${row.dense_rank}` : "—"}
-                                  </td>
-                                  <td className="px-2 py-2 text-right font-mono text-indigo-300">
-                                    {row.sparse_rank != null ? `#${row.sparse_rank}` : "—"}
-                                  </td>
-                                  <td className="px-2 py-2 text-right font-mono text-slate-300">
-                                    {row.rrf_score.toFixed(4)}
-                                  </td>
-                                  <td
-                                    className={`px-2 py-2 text-right font-mono font-semibold ${
-                                      !hasRerank
-                                        ? "text-slate-500"
-                                        : passed
-                                        ? "text-emerald-300"
-                                        : "text-rose-300"
-                                    }`}
-                                  >
-                                    {hasRerank
-                                      ? (row.rerank_score ?? 0).toFixed(4)
-                                      : "—"}
-                                  </td>
-                                  <td className="px-3 py-2 text-center">
-                                    {!hasRerank ? (
-                                      <span className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-400">
-                                        WAIT
-                                      </span>
-                                    ) : passed ? (
-                                      <span className="inline-flex items-center gap-1 rounded border border-emerald-500/35 bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-emerald-300">
-                                        <CheckCircle2 className="h-2.5 w-2.5" />
-                                        PASS
-                                      </span>
-                                    ) : (
-                                      <span className="rounded border border-rose-500/35 bg-rose-500/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-rose-300">
-                                        FAIL
-                                      </span>
-                                    )}
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                {/* Step 3 Details: Original vs Rewritten Query + Pool */}
+                {stage.step === 3 && step3 && status !== "skipped" && (
+                  <div className="mt-2 ml-7.5 space-y-1.5 text-xs">
+                    <div className="rounded border border-[var(--rule)] bg-[var(--paper)] px-2.5 py-2 space-y-1">
+                      <div className="flex items-start gap-2">
+                        <span className="w-16 shrink-0 font-mono text-[10.5px] text-[var(--ink-muted)]">
+                          Original
+                        </span>
+                        <span className="text-[12px] text-[var(--ink-secondary)]">
+                          {originalQuery}
+                        </span>
                       </div>
-
-                      {funnelRows.length > 10 && (
-                        <div className="border-t border-slate-800/80 bg-slate-900/40 px-3 py-2 text-center">
-                          <button
-                            type="button"
-                            onClick={() => setShowAllCandidates((prev) => !prev)}
-                            className="text-[11px] font-medium text-cyan-300 hover:text-cyan-200 underline cursor-pointer"
+                      {rewrittenQuery && (
+                        <div className="flex items-start gap-2 border-t border-[var(--rule)]/70 pt-1">
+                          <span
+                            className="w-16 shrink-0 font-mono text-[10.5px] font-medium"
+                            style={{
+                              color: wasRewritten
+                                ? "var(--copper)"
+                                : "var(--ink-muted)",
+                            }}
                           >
-                            {showAllCandidates
-                              ? "Show Top 10 Candidates"
-                              : `Show All ${funnelRows.length} RRF Candidates`}
-                          </button>
+                            {wasRewritten ? "Rewritten" : "Final"}
+                          </span>
+                          <span className="text-[12px] font-medium text-[var(--ink)]">
+                            {rewrittenQuery}
+                          </span>
                         </div>
                       )}
-                    </>
-                  )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] text-[var(--ink-muted)]">
+                      <span className="tabular-nums">
+                        Candidate pool:{" "}
+                        <strong className="text-[var(--ink)]">
+                          {Number(
+                            step3.details.candidate_count ?? funnelRows.length
+                          )}
+                        </strong>{" "}
+                        chunks
+                      </span>
+                      {preservedTokens.length > 0 && (
+                        <span className="truncate text-[var(--copper)]">
+                          Preserved: {preservedTokens.join(", ")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 4 Signature Move: Calibrated 0.65 Vernier Confidence Gauge */}
+                {stage.step === 4 &&
+                  status !== "skipped" &&
+                  (step4 || topRerankScore !== null) && (
+                  <div className="mt-2.5 ml-7.5 rounded border border-[var(--rule)] bg-[var(--paper)] p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <span className="font-semibold text-[var(--ink)]">
+                        Refusal Gate Vernier Gauge
+                      </span>
+                      <span
+                        className="font-mono text-[12px] tabular-nums font-semibold"
+                        style={{
+                          color:
+                            topRerankScore === null
+                              ? "var(--ink-muted)"
+                              : passesGate
+                              ? "var(--jade)"
+                              : "var(--crimson)",
+                        }}
+                      >
+                        {topRerankScore !== null
+                          ? `${topRerankScore.toFixed(4)} vs ${threshold.toFixed(2)} ${
+                              passesGate ? "PASS" : "REFUSED"
+                            }`
+                          : "Scoring…"}
+                      </span>
+                    </div>
+
+                    {/* Calibrated Vernier Scale */}
+                    <div className="mt-2.5">
+                      <div className="relative h-3 w-full overflow-hidden rounded-xs bg-[var(--mineral)]">
+                        {/* Safe / Refusal zone hairline tint */}
+                        <div
+                          className="absolute inset-y-0 left-0 bg-[#E6DCD8]/60"
+                          style={{ width: `${thresholdPct}%` }}
+                        />
+                        {/* Active Score Fill */}
+                        <div
+                          className="relative h-full transition-all duration-200"
+                          style={{
+                            width: `${scorePct}%`,
+                            backgroundColor:
+                              topRerankScore === null
+                                ? "var(--rule-strong)"
+                                : passesGate
+                                ? "var(--jade)"
+                                : "var(--crimson)",
+                          }}
+                        />
+                        {/* Precision 0.65 Gate Pin */}
+                        <div
+                          className="absolute inset-y-0 w-0.5 bg-[var(--ink)]"
+                          style={{ left: `${thresholdPct}%` }}
+                          title={`Refusal Gate Threshold: ${threshold.toFixed(2)}`}
+                        />
+                      </div>
+
+                      {/* Vernier Ticks */}
+                      <div className="relative mt-1 flex justify-between font-mono text-[10px] tabular-nums text-[var(--ink-muted)]">
+                        <span>0.00</span>
+                        <span>0.25</span>
+                        <span>0.50</span>
+                        <span className="font-semibold text-[var(--ink)]">
+                          {threshold.toFixed(2)} gate
+                        </span>
+                        <span>1.00</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--rule)]/70 pt-2 font-mono text-[11px] tabular-nums text-[var(--ink-muted)]">
+                      <span>
+                        Funnel:{" "}
+                        <strong className="text-[var(--ink)]">
+                          Top-{Number(step4?.details.input_candidates ?? funnelRows.length)}
+                        </strong>{" "}
+                        →{" "}
+                        <strong className="text-[var(--ink)]">
+                          Top-{Number(step4?.details.accepted_chunks ?? turn?.citations.length ?? 0)}
+                        </strong>
+                      </span>
+                      {turn?.refusal?.refused && (
+                        <span className="font-semibold text-[var(--crimson)]">
+                          LLM Skipped · 0 Tokens
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 5 Details */}
+                {stage.step === 5 && step5 && (
+                  <div className="mt-2 ml-7.5 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] text-[var(--ink-secondary)]">
+                    <span>
+                      llm_called:{" "}
+                      <strong
+                        style={{
+                          color:
+                            step5.details.llm_called === false
+                              ? "var(--ochre)"
+                              : "var(--jade)",
+                        }}
+                      >
+                        {step5.details.llm_called === false ? "FALSE" : "TRUE"}
+                      </strong>
+                    </span>
+                    <span className="tabular-nums text-[var(--ink-muted)]">
+                      cited: {Number(step5.details.cited_chunks ?? turn?.citations.length ?? 0)}
+                      {step5.details.model ? ` · ${String(step5.details.model)}` : ""}
+                    </span>
+                  </div>
+                )}
+
+                {/* Step 6 Details */}
+                {stage.step === 6 && step6 && (
+                  <div className="mt-2 ml-7.5 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] text-[var(--ink-muted)]">
+                    <span className="truncate">
+                      trace:{" "}
+                      <span className="text-[var(--ink-secondary)]">
+                        {String(step6.details.trace_id ?? turn?.traceId ?? "—")}
+                      </span>
+                    </span>
+                    {typeof turn?.totalLatencyMs === "number" && (
+                      <span className="tabular-nums text-[var(--ink)]">
+                        {turn.totalLatencyMs.toFixed(1)} ms
+                      </span>
+                    )}
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+
+        {/* Collapsible Candidate Funnel Table (Top-25 RRF -> Top-5 Cross-Encoder) */}
+        <div className="mt-5">
+          <button
+            type="button"
+            onClick={() => setFunnelExpanded((prev) => !prev)}
+            className="flex w-full items-center justify-between py-2 text-left cursor-pointer"
+          >
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--ink)]">
+              {funnelExpanded ? (
+                <ChevronDown className="h-3.5 w-3.5 text-[var(--ink-muted)]" />
+              ) : (
+                <ChevronRight className="h-3.5 w-3.5 text-[var(--ink-muted)]" />
+              )}
+              Candidate Funnel (RRF → Cross-Encoder)
+            </span>
+            <span className="font-mono text-[11px] tabular-nums text-[var(--ink-muted)]">
+              {funnelRows.length} rows
+            </span>
+          </button>
+
+          {funnelExpanded && (
+            <div className="overflow-hidden rounded border border-[var(--rule)] bg-[var(--paper)]">
+              {funnelRows.length === 0 ? (
+                <div className="px-3.5 py-5 text-center text-xs text-[var(--ink-muted)]">
+                  {cacheHit
+                    ? "Semantic Cache HIT — hybrid retrieval skipped."
+                    : turn
+                    ? "No candidate chunks matched the active tenant/role scope."
+                    : "Run a query to inspect Dense, BM25, RRF, and Cross-Encoder ranks."}
                 </div>
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[440px] border-collapse text-left text-[11.5px]">
+                      <thead>
+                        <tr className="border-b border-[var(--rule)] bg-[var(--ground)] text-[10.5px] font-semibold text-[var(--ink-secondary)]">
+                          <th className="px-3 py-2">Source</th>
+                          <th className="px-2 py-2 text-right">Dense</th>
+                          <th className="px-2 py-2 text-right">BM25</th>
+                          <th className="px-2 py-2 text-right">RRF</th>
+                          <th className="px-2 py-2 text-right">Rerank</th>
+                          <th className="px-3 py-2 text-right">Gate</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[var(--rule)]/70">
+                        {visibleFunnelRows.map((row, idx) => {
+                          const hasRerank = typeof row.rerank_score === "number";
+                          const rowPasses =
+                            hasRerank && (row.rerank_score ?? 0) >= threshold;
+
+                          return (
+                            <tr
+                              key={`${row.chunk_id}-${idx}`}
+                              className="transition-colors hover:bg-[var(--ground)]/60"
+                            >
+                              <td className="max-w-[165px] px-3 py-2">
+                                <div className="truncate font-medium text-[var(--ink)]">
+                                  {row.document_title || row.chunk_id.slice(0, 8)}
+                                </div>
+                                <div className="truncate font-mono text-[10px] text-[var(--ink-muted)]">
+                                  {row.section_header || row.chunk_id.slice(0, 10)}
+                                </div>
+                              </td>
+                              <td className="px-2 py-2 text-right font-mono tabular-nums text-[var(--ink-secondary)]">
+                                {row.dense_rank ? `#${row.dense_rank}` : "—"}
+                              </td>
+                              <td className="px-2 py-2 text-right font-mono tabular-nums text-[var(--ink-secondary)]">
+                                {row.sparse_rank ? `#${row.sparse_rank}` : "—"}
+                              </td>
+                              <td className="px-2 py-2 text-right font-mono tabular-nums text-[var(--ink)]">
+                                {typeof row.rrf_score === "number"
+                                  ? row.rrf_score.toFixed(4)
+                                  : "—"}
+                              </td>
+                              <td
+                                className="px-2 py-2 text-right font-mono tabular-nums font-semibold"
+                                style={{
+                                  color: !hasRerank
+                                    ? "var(--ink-muted)"
+                                    : rowPasses
+                                    ? "var(--jade)"
+                                    : "var(--crimson)",
+                                }}
+                              >
+                                {hasRerank ? row.rerank_score!.toFixed(4) : "—"}
+                              </td>
+                              <td className="px-3 py-2 text-right font-mono text-[10.5px]">
+                                {!hasRerank ? (
+                                  <span className="text-[var(--ink-muted)]">…</span>
+                                ) : rowPasses ? (
+                                  <span className="font-semibold text-[var(--jade)]">
+                                    PASS
+                                  </span>
+                                ) : (
+                                  <span className="text-[var(--ink-muted)]">
+                                    DROP
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {funnelRows.length > 10 && (
+                    <div className="border-t border-[var(--rule)] bg-[var(--ground)]/60 px-3 py-2 text-center">
+                      <button
+                        type="button"
+                        onClick={() => setShowAllCandidates((prev) => !prev)}
+                        className="text-xs font-medium text-[var(--copper)] hover:text-[var(--copper-hover)] cursor-pointer"
+                      >
+                        {showAllCandidates
+                          ? "Show top 10 candidates"
+                          : `Show all ${funnelRows.length} candidates`}
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </aside>
   );

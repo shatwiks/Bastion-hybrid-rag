@@ -2,16 +2,11 @@
 
 import React, { useState } from "react";
 import {
-  Building2,
-  DatabaseZap,
-  KeyRound,
-  Lock,
   PanelRightClose,
   PanelRightOpen,
   RefreshCw,
   ShieldCheck,
   Upload,
-  Users,
 } from "lucide-react";
 
 import { mintDemoToken } from "@/lib/sse-client";
@@ -31,28 +26,21 @@ const PERSONA_OPTIONS: Array<{
   id: PersonaType;
   label: string;
   tierDescription: string;
-  activeClass: string;
 }> = [
   {
     id: "public",
     label: "Public",
     tierDescription: "public only",
-    activeClass:
-      "bg-sky-500/20 text-sky-200 border-sky-400/60 shadow-[0_0_0_1px_rgba(56,189,248,0.25)]",
   },
   {
     id: "support_tier_1",
     label: "Support Tier 1",
     tierDescription: "public + support_tier_1",
-    activeClass:
-      "bg-indigo-500/20 text-indigo-200 border-indigo-400/60 shadow-[0_0_0_1px_rgba(129,140,248,0.25)]",
   },
   {
     id: "executive",
     label: "Executive",
     tierDescription: "public + support_tier_1 + executive",
-    activeClass:
-      "bg-amber-500/20 text-amber-200 border-amber-400/60 shadow-[0_0_0_1px_rgba(251,191,36,0.25)]",
   },
 ];
 
@@ -110,69 +98,69 @@ export function PersonaBar({
     }
   };
 
-  const canRerun = Boolean(lastQuery.trim()) && Boolean(session) && !isStreaming && !isMinting;
+  const canRerun =
+    Boolean(lastQuery.trim()) && Boolean(session) && !isStreaming && !isMinting;
+
+  const isHealthy = health?.status === "ok";
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-800/90 bg-slate-950/95 backdrop-blur-md">
-      <div className="mx-auto flex w-full max-w-[1680px] min-w-0 flex-col gap-2.5 px-4 py-3 lg:flex-row lg:items-center lg:justify-between lg:px-6">
-        {/* Left: Brand + Tenant + Persona Selectors */}
-        <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-2 pr-2 sm:border-r sm:border-slate-800">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-              <ShieldCheck className="h-4 w-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold tracking-tight text-slate-100">
-                  Enterprise RAG
-                </span>
-                {health && (
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium border ${
-                      health.status === "ok"
-                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
-                        : "bg-amber-500/10 text-amber-300 border-amber-500/30"
-                    }`}
-                    title={`Postgres: ${health.postgres} | Redis: ${health.redis}`}
-                  >
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        health.status === "ok" ? "bg-emerald-400" : "bg-amber-400"
-                      }`}
-                    />
-                    {health.status === "ok" ? "LIVE" : "DEGRADED"}
-                  </span>
-                )}
-              </div>
-              <p className="text-[11px] text-slate-400 leading-tight">
-                Pre-Retrieval RBAC Isolation
-              </p>
+    <header className="sticky top-0 z-30 border-b border-[var(--shell-rule)] bg-[var(--shell-bg)] text-[var(--shell-ink)]">
+      <div className="mx-auto flex w-full max-w-[1680px] min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-2.5 px-4 py-2.5 lg:px-6">
+        {/* Left: Brand Identity + Segmented Tenant & Role Switchers */}
+        <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2.5 sm:gap-3.5">
+          {/* Wordmark & System Health */}
+          <div className="flex items-center gap-2.5 pr-3 sm:border-r sm:border-[var(--shell-rule)]">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[var(--copper)] text-[#FCFBF8]">
+              <ShieldCheck className="h-4 w-4" strokeWidth={2} />
+            </span>
+            <div className="flex items-center gap-2 leading-none">
+              <span className="text-[15px] font-semibold tracking-tight text-[var(--shell-ink)]">
+                Bastion
+              </span>
+              <span
+                className="inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 text-[11px] font-medium"
+                style={{
+                  backgroundColor: isHealthy
+                    ? "rgba(74, 222, 128, 0.14)"
+                    : "rgba(255, 255, 255, 0.08)",
+                  color: isHealthy ? "#9CE7C6" : "var(--shell-muted)",
+                }}
+                title={
+                  health
+                    ? `Backend ${health.status} · Postgres: ${health.postgres} · Redis: ${health.redis}`
+                    : "Checking backend health"
+                }
+              >
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{
+                    backgroundColor: isHealthy ? "#5CE0A8" : "#9EB7BA",
+                  }}
+                />
+                {isHealthy ? "Live" : "Checking"}
+              </span>
             </div>
           </div>
 
-          {/* Tenant Selector */}
+          {/* Tenant Segmented Control */}
           <div
-            className="inline-flex max-w-full flex-wrap items-center rounded-lg border border-slate-800 bg-slate-900/90 p-0.5"
             role="group"
-            aria-label="Tenant Selector"
+            aria-label="Select tenant"
+            className="inline-flex max-w-full items-center rounded border border-[var(--shell-rule)] bg-[#0E262A] p-0.5"
           >
-            <span className="px-2 text-[11px] font-medium text-slate-400 inline-flex items-center gap-1">
-              <Building2 className="h-3.5 w-3.5 text-slate-500" />
-              Tenant
-            </span>
             {TENANT_OPTIONS.map((tenant) => {
-              const selected = activeTenant === tenant.id;
+              const isSelected = activeTenant === tenant.id;
               return (
                 <button
                   key={tenant.id}
                   type="button"
-                  aria-pressed={selected}
                   disabled={isMinting || isStreaming}
+                  aria-pressed={isSelected}
                   onClick={() => handleSwitch(tenant.id, activePersona)}
-                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                    selected
-                      ? "bg-slate-800 text-white border border-slate-700 shadow-sm"
-                      : "text-slate-400 hover:text-slate-200 border border-transparent"
+                  className={`rounded-[3px] px-2.5 py-1 text-xs font-medium transition-colors duration-150 cursor-pointer disabled:opacity-50 ${
+                    isSelected
+                      ? "bg-[var(--paper)] text-[var(--ink)] shadow-xs"
+                      : "text-[var(--shell-muted)] hover:text-[var(--shell-ink)]"
                   }`}
                 >
                   {tenant.label}
@@ -181,30 +169,26 @@ export function PersonaBar({
             })}
           </div>
 
-          {/* Role Persona Pills */}
+          {/* Role Persona Segmented Control */}
           <div
-            className="inline-flex max-w-full flex-wrap items-center gap-1 rounded-lg border border-slate-800 bg-slate-900/90 p-0.5"
             role="group"
-            aria-label="Role Persona Selector"
+            aria-label="Select RBAC role persona"
+            className="inline-flex max-w-full flex-wrap items-center rounded border border-[var(--shell-rule)] bg-[#0E262A] p-0.5"
           >
-            <span className="px-2 text-[11px] font-medium text-slate-400 inline-flex items-center gap-1">
-              <Users className="h-3.5 w-3.5 text-slate-500" />
-              Role
-            </span>
             {PERSONA_OPTIONS.map((persona) => {
-              const selected = activePersona === persona.id;
+              const isSelected = activePersona === persona.id;
               return (
                 <button
                   key={persona.id}
                   type="button"
-                  aria-pressed={selected}
                   disabled={isMinting || isStreaming}
-                  title={`Roles: ${persona.tierDescription}`}
+                  aria-pressed={isSelected}
+                  title={`Role scope: ${persona.tierDescription}`}
                   onClick={() => handleSwitch(activeTenant, persona.id)}
-                  className={`rounded-md border px-2.5 py-1 text-xs font-medium transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                    selected
-                      ? persona.activeClass
-                      : "border-transparent text-slate-400 hover:text-slate-200"
+                  className={`rounded-[3px] px-2.5 py-1 text-xs font-medium transition-colors duration-150 cursor-pointer disabled:opacity-50 ${
+                    isSelected
+                      ? "bg-[var(--copper)] text-[#FCFBF8]"
+                      : "text-[var(--shell-muted)] hover:text-[var(--shell-ink)]"
                   }`}
                 >
                   {persona.label}
@@ -214,115 +198,104 @@ export function PersonaBar({
           </div>
         </div>
 
-        {/* Center/Right: Live SecurityContext Badge + Action Buttons */}
-        <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2.5 lg:w-auto lg:justify-end">
-          {/* Security Context Display */}
-          <div
-            className="flex max-w-full min-w-0 flex-wrap items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/75 px-3 py-1.5 text-xs"
-            aria-label="Active JWT Security Context"
-          >
-            <div className="flex items-center gap-1.5 text-slate-400">
-              {isMinting ? (
-                <RefreshCw className="h-3.5 w-3.5 animate-spin text-indigo-400" />
-              ) : (
-                <Lock className="h-3.5 w-3.5 text-emerald-400" />
-              )}
-              <span className="font-mono text-[11px] text-slate-300">
-                {session ? session.tenant_id : activeTenant}
+        {/* Right: Active Scope Readout + Utility Actions */}
+        <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
+          {/* Active JWT Scope Readout */}
+          {session && (
+            <div
+              className="hidden items-center gap-2 rounded border border-[var(--shell-rule)] bg-[#0E262A] px-2.5 py-1 text-[11px] xl:flex"
+              title={`Tenant: ${session.tenant_id} · Allowed roles: ${session.allowed_roles.join(", ")} · Scope hash: ${session.scope_hash}`}
+            >
+              <span className="font-mono text-[var(--shell-muted)]">
+                {session.tenant_id}
+              </span>
+              <span className="text-[var(--shell-rule)]">/</span>
+              <span className="font-mono text-[#D5E4E6]">
+                {session.allowed_roles.join(", ")}
+              </span>
+              <span className="text-[var(--shell-rule)]">·</span>
+              <span className="font-mono tabular-nums text-[#8FD4BE]">
+                {session.scope_hash.slice(0, 12)}
               </span>
             </div>
+          )}
 
-            <span className="hidden sm:inline text-slate-700">|</span>
+          {/* Re-run Last Query */}
+          <button
+            type="button"
+            disabled={!canRerun}
+            onClick={() => onRerunLastQuery(session ?? undefined)}
+            title={
+              lastQuery
+                ? `Re-run "${lastQuery}" under ${activeTenant} / ${activePersona}`
+                : "Ask a question first to re-run under another role"
+            }
+            className="inline-flex h-8 items-center gap-1.5 rounded border border-[var(--shell-rule)] bg-[var(--shell-surface)] px-2.5 text-xs font-medium text-[var(--shell-ink)] transition-colors duration-150 hover:bg-[var(--shell-surface-active)] active:translate-y-px cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <RefreshCw
+              className={`h-3.5 w-3.5 ${isMinting ? "animate-spin" : ""}`}
+            />
+            <span className="hidden sm:inline">Re-run Last Query Under New Role</span>
+            <span className="sm:hidden">Re-run</span>
+          </button>
 
-            <div className="flex flex-wrap items-center gap-1">
-              {(session?.allowed_roles ?? ["public"]).map((role) => (
-                <span
-                  key={role}
-                  className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[10px] font-medium text-slate-200 border border-slate-700/80"
-                >
-                  {role}
-                </span>
-              ))}
-            </div>
+          {/* Admin Ingestion */}
+          <button
+            type="button"
+            onClick={onOpenAdminModal}
+            className="inline-flex h-8 items-center gap-1.5 rounded border border-[var(--shell-rule)] bg-[var(--shell-surface)] px-2.5 text-xs font-medium text-[var(--shell-ink)] transition-colors duration-150 hover:bg-[var(--shell-surface-active)] active:translate-y-px cursor-pointer"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            <span>Admin Ingestion</span>
+          </button>
 
-            <span className="hidden sm:inline text-slate-700">|</span>
-
-            <div
-              className="flex min-w-0 max-w-full items-center gap-1 font-mono text-[11px] text-cyan-300"
-              title="Canonical SHA-256 RBAC scope_hash partitioning PostgreSQL retrieval and Redis Semantic Cache"
-            >
-              <KeyRound className="h-3 w-3 shrink-0 text-cyan-400" />
-              <span className="text-slate-400">scope_hash:</span>
-              <span className="truncate">{session?.scope_hash ?? "minting..."}</span>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex max-w-full flex-wrap items-center gap-2">
+          {/* Telemetry Inspector Toggle */}
+          {onToggleInspector && (
             <button
               type="button"
-              disabled={!canRerun}
-              onClick={() => onRerunLastQuery(session ?? undefined)}
-              title={
-                lastQuery.trim()
-                  ? `Re-run query under ${activeTenant} / ${activePersona}: "${lastQuery}"`
-                  : "Send a query first to enable one-click RBAC re-run"
+              onClick={onToggleInspector}
+              aria-expanded={isInspectorOpen}
+              aria-label={
+                isInspectorOpen
+                  ? "Collapse Telemetry Inspector"
+                  : "Expand Telemetry Inspector"
               }
-              className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-600/20 px-3 py-1.5 text-xs font-medium text-indigo-200 hover:bg-indigo-600/35 hover:border-indigo-400/60 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              className={`inline-flex h-8 items-center gap-1.5 rounded border px-2.5 text-xs font-medium transition-colors duration-150 cursor-pointer ${
+                isInspectorOpen
+                  ? "border-[#D7D2C6]/30 bg-[var(--paper)] text-[var(--ink)]"
+                  : "border-[var(--shell-rule)] bg-[var(--shell-surface)] text-[var(--shell-ink)] hover:bg-[var(--shell-surface-active)]"
+              }`}
             >
-              <RefreshCw
-                className={`h-3.5 w-3.5 ${isStreaming ? "animate-spin" : ""}`}
-              />
-              <span>Re-run Last Query Under New Role</span>
+              {isInspectorOpen ? (
+                <PanelRightClose className="h-3.5 w-3.5" />
+              ) : (
+                <PanelRightOpen className="h-3.5 w-3.5" />
+              )}
+              <span className="hidden md:inline">Inspector</span>
             </button>
-
-            <button
-              type="button"
-              onClick={onOpenAdminModal}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700/90 hover:text-white transition-colors cursor-pointer"
-            >
-              <Upload className="h-3.5 w-3.5 text-emerald-400" />
-              <span>Admin Ingestion</span>
-            </button>
-
-            {onToggleInspector && (
-              <button
-                type="button"
-                onClick={onToggleInspector}
-                aria-expanded={Boolean(isInspectorOpen)}
-                title={
-                  isInspectorOpen
-                    ? "Collapse Telemetry Inspector"
-                    : "Expand Telemetry Inspector"
-                }
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
-              >
-                {isInspectorOpen ? (
-                  <PanelRightClose className="h-3.5 w-3.5 text-cyan-400" />
-                ) : (
-                  <PanelRightOpen className="h-3.5 w-3.5 text-cyan-400" />
-                )}
-                <DatabaseZap className="h-3.5 w-3.5 hidden sm:inline text-slate-400" />
-                <span className="hidden xl:inline">Inspector</span>
-              </button>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
+      {/* Compact Mobile Scope Strip (visible below xl) */}
+      {session && (
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--shell-rule)]/70 bg-[#0E262A] px-4 py-1 text-[11px] text-[var(--shell-muted)] xl:hidden">
+          <span className="truncate font-mono">
+            {session.tenant_id} · {session.allowed_roles.join(", ")}
+          </span>
+          <span className="font-mono tabular-nums text-[#8FD4BE]">
+            scope:{session.scope_hash}
+          </span>
+        </div>
+      )}
+
+      {/* Mint Error Notice */}
       {mintError && (
         <div
           role="alert"
-          className="border-t border-rose-900/60 bg-rose-950/70 px-6 py-1.5 text-xs text-rose-200 flex items-center justify-between"
+          className="border-t border-[var(--crimson-rule)] bg-[var(--crimson-soft)] px-4 py-1.5 text-xs text-[var(--crimson)]"
         >
-          <span>JWT Persona Switch Failed: {mintError}</span>
-          <button
-            type="button"
-            onClick={() => setMintError(null)}
-            className="text-rose-300 underline hover:text-white cursor-pointer"
-          >
-            Dismiss
-          </button>
+          Unable to switch security context: {mintError}
         </div>
       )}
     </header>

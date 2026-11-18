@@ -293,7 +293,7 @@ export default function EnterpriseRagWorkspacePage() {
   }, []);
 
   return (
-    <div className="flex min-h-screen w-full min-w-0 flex-col overflow-x-clip bg-slate-950 text-slate-100">
+    <div className="flex min-h-screen w-full min-w-0 flex-col overflow-x-clip bg-[var(--ground)] text-[var(--ink)] lg:h-screen lg:overflow-hidden">
       <PersonaBar
         session={session}
         onSessionChange={(nextSession) => setSession(nextSession)}
@@ -309,11 +309,11 @@ export default function EnterpriseRagWorkspacePage() {
       {initError && !session && (
         <div
           role="alert"
-          className="mx-auto mt-3 flex w-full max-w-[1680px] items-center justify-between gap-3 px-4 lg:px-6"
+          className="border-b border-[var(--ochre-rule)] bg-[var(--ochre-soft)] px-4 py-2.5 lg:px-6"
         >
-          <div className="flex w-full flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/40 bg-amber-950/40 px-4 py-2.5 text-xs text-amber-200">
+          <div className="mx-auto flex w-full max-w-[1680px] flex-wrap items-center justify-between gap-3 text-xs text-[var(--ochre)]">
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-amber-400 shrink-0" />
+              <AlertCircle className="h-4 w-4 shrink-0" />
               <span>
                 Backend session initialization pending: {initError}. Ensure the
                 FastAPI server is running on port 8000.
@@ -323,7 +323,7 @@ export default function EnterpriseRagWorkspacePage() {
               type="button"
               disabled={isInitializing}
               onClick={() => void initializeDemoSession()}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/50 bg-amber-500/15 px-3 py-1 font-medium text-amber-100 hover:bg-amber-500/30 transition-colors cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded border border-[var(--ochre-rule)] bg-[var(--paper)] px-3 py-1 font-medium text-[var(--ink)] hover:border-[var(--copper)] transition-colors cursor-pointer disabled:opacity-50"
             >
               <RefreshCw
                 className={`h-3.5 w-3.5 ${isInitializing ? "animate-spin" : ""}`}
@@ -334,11 +334,11 @@ export default function EnterpriseRagWorkspacePage() {
         </div>
       )}
 
-      {/* Split-Pane Enterprise Workspace (60% Chat / 40% Collapsible Telemetry Inspector) */}
-      <main className="mx-auto flex w-full max-w-[1680px] min-w-0 flex-1 flex-col gap-4 p-4 lg:flex-row lg:items-stretch lg:px-6 lg:py-4">
+      {/* Edge-to-Edge Architectural Split Workspace (62% Paper Chat / 38% Limestone Telemetry Rail) */}
+      <main className="mx-auto flex w-full max-w-[1680px] min-w-0 flex-1 flex-col divide-y divide-[var(--rule)] border-x border-[var(--rule)]/70 lg:min-h-0 lg:flex-row lg:divide-x lg:divide-y-0">
         <div
-          className={`flex min-h-0 min-w-0 flex-col transition-all duration-200 ${
-            isInspectorOpen ? "w-full lg:w-[60%]" : "w-full"
+          className={`flex min-h-0 min-w-0 flex-col transition-all duration-150 ${
+            isInspectorOpen ? "w-full lg:w-[62%]" : "w-full"
           }`}
         >
           <ChatViewport
@@ -353,7 +353,7 @@ export default function EnterpriseRagWorkspacePage() {
         </div>
 
         {isInspectorOpen && (
-          <div className="flex min-h-0 min-w-0 w-full flex-col lg:w-[40%]">
+          <div className="flex min-h-0 min-w-0 w-full flex-col lg:w-[38%]">
             <TelemetryInspectorDrawer
               turn={activeTurn}
               session={session}

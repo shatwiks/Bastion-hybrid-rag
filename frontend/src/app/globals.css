@@ -1,14 +1,99 @@
 @import "tailwindcss";
 
 :root {
-  --background: #090d16;
-  --foreground: #f1f5f9;
+  /* Limestone Atelier palette */
+  --shell-bg: #133136;
+  --shell-surface: #1b4046;
+  --shell-surface-active: #23525a;
+  --shell-rule: #28565e;
+  --shell-ink: #f4f2ec;
+  --shell-muted: #9eb7ba;
+
+  --ground: #f2f0ea;
+  --mineral: #e7e3d9;
+  --paper: #fcfbf8;
+  --rule: #d7d2c6;
+  --rule-strong: #beb8aa;
+
+  --ink: #162124;
+  --ink-secondary: #465558;
+  --ink-muted: #5f6e71;
+
+  --copper: #b55228;
+  --copper-hover: #99421d;
+  --copper-soft: #faf0eb;
+  --copper-rule: #e6c2b2;
+
+  --jade: #116b4f;
+  --jade-soft: #eaf5f0;
+  --jade-rule: #b4dccb;
+
+  --crimson: #a82828;
+  --crimson-soft: #fdefef;
+  --crimson-rule: #e8bdbd;
+
+  --ochre: #8f5609;
+  --ochre-soft: #faf4e8;
+  --ochre-rule: #e3cca1;
 }
 
+@theme inline {
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  margin: 0;
-  padding: 0;
+  height: 100%;
+  background-color: var(--ground);
+  color: var(--ink);
+  caret-color: var(--copper);
+}
+
+::selection {
+  background-color: #eed6ca;
+  color: #162124;
+}
+
+:focus-visible {
+  outline: 2px solid var(--copper);
+  outline-offset: 2px;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle custom scrollbar matching limestone palette */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cdc7ba;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b2ab9b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

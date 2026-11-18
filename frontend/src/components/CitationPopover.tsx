@@ -1,13 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import {
-  FileText,
-  Layers,
-  Shield,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { FileText, Layers, Shield, X } from "lucide-react";
 
 import type { CitationItem } from "@/types/rag";
 
@@ -16,13 +10,6 @@ export interface CitationPopoverProps {
   onClose: () => void;
   citationIndex?: number;
 }
-
-const ROLE_BADGE_STYLES: Record<string, string> = {
-  public: "bg-sky-500/15 text-sky-300 border-sky-500/30",
-  support_tier_1: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
-  executive: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-  admin: "bg-rose-500/15 text-rose-300 border-rose-500/30",
-};
 
 export function CitationPopover({
   citation,
@@ -47,161 +34,161 @@ export function CitationPopover({
   const scorePct = Math.max(0, Math.min(100, citation.rerank_score * 100));
   const passesThreshold = citation.rerank_score >= 0.65;
   const hasRankMetadata =
-    citation.dense_rank !== undefined && citation.dense_rank !== null ||
-    citation.sparse_rank !== undefined && citation.sparse_rank !== null ||
-    citation.rrf_score !== undefined && citation.rrf_score !== null;
+    (citation.dense_rank !== undefined && citation.dense_rank !== null) ||
+    (citation.sparse_rank !== undefined && citation.sparse_rank !== null) ||
+    (citation.rrf_score !== undefined && citation.rrf_score !== null);
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#133136]/45 p-4 backdrop-blur-[2px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="citation-popover-title"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 shadow-2xl"
+        className="w-full max-w-2xl overflow-hidden rounded-md border border-[var(--rule-strong)] bg-[var(--paper)] shadow-[0_20px_50px_-16px_rgba(19,49,54,0.35)]"
         onClick={(event) => event.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b border-slate-800 bg-slate-900/95 px-5 py-4">
+        <div className="flex items-start justify-between gap-4 border-b border-[var(--rule)] bg-[var(--ground)] px-5 py-4">
           <div className="min-w-0 space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-md bg-cyan-500/15 border border-cyan-500/30 px-2 py-0.5 font-mono text-[11px] font-semibold text-cyan-300">
-                {typeof citationIndex === "number" ? `#${citationIndex + 1} · ` : ""}
-                {citation.chunk_id}
-              </span>
-              <span
-                className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold ${
-                  passesThreshold
-                    ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                    : "bg-amber-500/15 text-amber-300 border-amber-500/30"
-                }`}
-              >
-                <Sparkles className="h-3 w-3" />
-                Cross-Encoder: {scorePct.toFixed(1)}% ({citation.rerank_score.toFixed(4)})
-              </span>
-            </div>
-
             <h2
               id="citation-popover-title"
-              className="flex items-center gap-2 text-base font-semibold text-white"
+              className="flex items-center gap-2 text-base font-semibold text-[var(--ink)]"
             >
-              <FileText className="h-4 w-4 shrink-0 text-indigo-400" />
+              <FileText className="h-4 w-4 shrink-0 text-[var(--copper)]" />
               <span className="truncate">{citation.document_title}</span>
             </h2>
 
-            <p className="flex items-center gap-1.5 text-xs text-slate-400">
-              <Layers className="h-3.5 w-3.5 shrink-0 text-slate-500" />
-              <span className="truncate">{citation.section_header || "Document Root"}</span>
-            </p>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--ink-secondary)]">
+              <span className="inline-flex items-center gap-1">
+                <Layers className="h-3.5 w-3.5 text-[var(--ink-muted)]" />
+                <span className="truncate">
+                  {citation.section_header || "Document Root"}
+                </span>
+              </span>
+              <span className="font-mono text-[11px] text-[var(--ink-muted)]">
+                {typeof citationIndex === "number" ? `#${citationIndex + 1} · ` : ""}
+                {citation.chunk_id}
+              </span>
+            </div>
           </div>
 
           <button
             type="button"
             onClick={onClose}
             aria-label="Close source inspection popover"
-            className="rounded-lg border border-slate-700/80 bg-slate-800/80 p-1.5 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
+            className="rounded border border-[var(--rule)] bg-[var(--paper)] p-1.5 text-[var(--ink-secondary)] transition-colors hover:border-[var(--rule-strong)] hover:text-[var(--ink)] cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="space-y-4 p-5">
-          {/* RBAC Roles & Confidence Score Bar */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-              <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                <Shield className="h-3.5 w-3.5 text-emerald-400" />
-                Allowed Roles (Chunk ACL)
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {citation.allowed_roles.map((role) => (
-                  <span
-                    key={role}
-                    className={`rounded-md border px-2 py-0.5 font-mono text-[11px] font-medium ${
-                      ROLE_BADGE_STYLES[role] ??
-                      "bg-slate-800 text-slate-200 border-slate-700"
-                    }`}
-                  >
-                    {role}
-                  </span>
-                ))}
-              </div>
+        {/* Metadata Bar (Hairline Architectural Grid — zero nested rounded boxes) */}
+        <div className="grid grid-cols-1 divide-y divide-[var(--rule)] border-b border-[var(--rule)] bg-[var(--paper)] sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+          {/* Chunk ACL */}
+          <div className="px-5 py-3.5">
+            <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-[var(--ink-secondary)]">
+              <Shield className="h-3.5 w-3.5 text-[var(--jade)]" />
+              Allowed Roles (Chunk ACL)
             </div>
-
-            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-              <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                <span>Rerank Confidence</span>
-                <span className="font-mono text-slate-200">
-                  {scorePct.toFixed(1)}% / 65.0% gate
+            <div className="flex flex-wrap gap-1.5">
+              {citation.allowed_roles.map((role) => (
+                <span
+                  key={role}
+                  className="rounded border border-[var(--rule)] bg-[var(--ground)] px-2 py-0.5 font-mono text-[11px] font-medium text-[var(--ink)]"
+                >
+                  {role}
                 </span>
-              </div>
-              <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-800">
-                <div
-                  className={`h-full rounded-full transition-all ${
-                    passesThreshold ? "bg-emerald-500" : "bg-amber-500"
-                  }`}
-                  style={{ width: `${scorePct}%` }}
-                />
-                <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-rose-400"
-                  style={{ left: "65%" }}
-                  title="0.65 Refusal Gate Threshold"
-                />
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* RRF Rank Breakdown */}
-          <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                Hybrid RRF Rank Breakdown
+          {/* Cross-Encoder Score */}
+          <div className="px-5 py-3.5">
+            <div className="mb-1.5 flex items-center justify-between text-xs">
+              <span className="font-semibold text-[var(--ink-secondary)]">
+                Cross-Encoder Confidence
               </span>
-              {!hasRankMetadata && (
-                <span className="text-[11px] text-amber-300/90">
-                  Served from Semantic Cache (RRF bypassed)
-                </span>
-              )}
-            </div>
-            <div className="grid grid-cols-3 gap-2 font-mono text-xs">
-              <div className="rounded-lg border border-slate-800/80 bg-slate-900/70 px-3 py-2">
-                <div className="text-[10px] uppercase text-slate-500">Dense #</div>
-                <div className="mt-0.5 font-semibold text-sky-300">
-                  {citation.dense_rank != null ? `#${citation.dense_rank}` : "—"}
-                </div>
-              </div>
-              <div className="rounded-lg border border-slate-800/80 bg-slate-900/70 px-3 py-2">
-                <div className="text-[10px] uppercase text-slate-500">BM25 #</div>
-                <div className="mt-0.5 font-semibold text-indigo-300">
-                  {citation.sparse_rank != null ? `#${citation.sparse_rank}` : "—"}
-                </div>
-              </div>
-              <div className="rounded-lg border border-slate-800/80 bg-slate-900/70 px-3 py-2">
-                <div className="text-[10px] uppercase text-slate-500">RRF Score</div>
-                <div className="mt-0.5 font-semibold text-emerald-300">
-                  {citation.rrf_score != null ? citation.rrf_score.toFixed(6) : "—"}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Full Chunk Content (Rendered strictly as escaped React text node) */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-              <span>Retrieved Source Chunk Content</span>
-              <span className="font-mono text-[10px] text-slate-500">
-                doc_id: {citation.document_id}
+              <span
+                className="font-mono tabular-nums font-semibold"
+                style={{
+                  color: passesThreshold ? "var(--jade)" : "var(--crimson)",
+                }}
+              >
+                {scorePct.toFixed(1)}% ({citation.rerank_score.toFixed(4)})
               </span>
             </div>
-            <div className="max-h-64 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950 p-4">
-              <pre className="whitespace-pre-wrap break-words font-sans text-sm leading-relaxed text-slate-200">
-                {citation.content}
-              </pre>
+            <div className="relative h-2 w-full overflow-hidden rounded-xs bg-[var(--mineral)]">
+              <div
+                className="h-full transition-all duration-200"
+                style={{
+                  width: `${scorePct}%`,
+                  backgroundColor: passesThreshold
+                    ? "var(--jade)"
+                    : "var(--crimson)",
+                }}
+              />
+              <div
+                className="absolute inset-y-0 w-0.5 bg-[var(--ink)]"
+                style={{ left: "65%" }}
+                title="0.65 Refusal Gate Threshold"
+              />
+            </div>
+            <div className="mt-1 flex justify-between font-mono text-[10px] tabular-nums text-[var(--ink-muted)]">
+              <span>0.00</span>
+              <span>0.65 gate</span>
+              <span>1.00</span>
             </div>
           </div>
+        </div>
+
+        {/* Retrieval Provenance Strip */}
+        <div className="border-b border-[var(--rule)] bg-[var(--ground)]/60 px-5 py-2.5">
+          {hasRankMetadata ? (
+            <div className="grid grid-cols-3 gap-4 text-xs">
+              <div>
+                <div className="text-[11px] text-[var(--ink-muted)]">Dense Rank</div>
+                <div className="font-mono tabular-nums font-semibold text-[var(--ink)]">
+                  {citation.dense_rank ? `#${citation.dense_rank}` : "—"}
+                </div>
+              </div>
+              <div>
+                <div className="text-[11px] text-[var(--ink-muted)]">BM25 Rank</div>
+                <div className="font-mono tabular-nums font-semibold text-[var(--ink)]">
+                  {citation.sparse_rank ? `#${citation.sparse_rank}` : "—"}
+                </div>
+              </div>
+              <div>
+                <div className="text-[11px] text-[var(--ink-muted)]">RRF Score</div>
+                <div className="font-mono tabular-nums font-semibold text-[var(--ink)]">
+                  {typeof citation.rrf_score === "number"
+                    ? citation.rrf_score.toFixed(6)
+                    : "—"}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-[var(--ink-secondary)]">
+              Served directly from the permission-scoped Redis semantic cache (Steps 3–5 bypassed).
+            </p>
+          )}
+        </div>
+
+        {/* Verified Chunk Content */}
+        <div className="p-5">
+          <div className="mb-2 flex items-center justify-between text-xs">
+            <span className="font-semibold text-[var(--ink-secondary)]">
+              Verified Source Excerpt
+            </span>
+            <span className="font-mono text-[11px] text-[var(--ink-muted)]">
+              Escaped plain text
+            </span>
+          </div>
+          <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap break-words rounded border border-[var(--rule)] bg-[var(--ground)] p-4 font-mono text-[12.5px] leading-relaxed text-[var(--ink)]">
+            {citation.content}
+          </pre>
         </div>
       </div>
     </div>

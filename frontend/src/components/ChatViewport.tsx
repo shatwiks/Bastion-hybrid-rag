@@ -1,18 +1,14 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
+  ArrowRight,
   ArrowUp,
-  Bot,
-  CheckCircle2,
-  Cpu,
+  ChevronDown,
   FileSearch,
-  Lock,
   ShieldAlert,
-  Sparkles,
   Square,
-  User,
   Zap,
 } from "lucide-react";
 
@@ -36,7 +32,8 @@ export const GUIDED_SCENARIOS: GuidedScenario[] = [
     query:
       "How do I diagnose and resolve ERR_409_CONFLICT during concurrent storage sync?",
     recommendedPersona: "support_tier_1",
-    description: "Tests exact technical error-code recall via hybrid lexical + dense retrieval.",
+    description:
+      "Tests exact technical error-code recall via hybrid lexical + dense retrieval.",
   },
   {
     id: "hardware-sku",
@@ -44,7 +41,8 @@ export const GUIDED_SCENARIOS: GuidedScenario[] = [
     badge: "SKU Exact Match",
     query: "What are the specifications and thermal limits for SKU-9921-A?",
     recommendedPersona: "support_tier_1",
-    description: "Verifies hyphenated SKU token preservation and technical grounding.",
+    description:
+      "Verifies hyphenated SKU token preservation and technical grounding.",
   },
   {
     id: "executive-ma",
@@ -52,7 +50,8 @@ export const GUIDED_SCENARIOS: GuidedScenario[] = [
     badge: "RBAC Boundary",
     query: "What are the confidential Q3 financial expansion and M&A targets?",
     recommendedPersona: "executive",
-    description: "Demonstrates executive-only retrieval vs. public/tier-1 refusal.",
+    description:
+      "Demonstrates executive-only retrieval vs. public/tier-1 refusal.",
   },
   {
     id: "refusal-trap",
@@ -60,7 +59,8 @@ export const GUIDED_SCENARIOS: GuidedScenario[] = [
     badge: "< 0.65 Gate",
     query: "How do I calibrate the quantum wormhole flux capacitor?",
     recommendedPersona: "public",
-    description: "Triggers deterministic Cross-Encoder refusal with 0 LLM tokens spent.",
+    description:
+      "Triggers deterministic Cross-Encoder refusal with 0 LLM tokens spent.",
   },
 ];
 
@@ -74,6 +74,23 @@ export interface ChatViewportProps {
   onSelectTurn?: (turnId: string) => void;
 }
 
+function renderFormattedText(value: string): React.ReactNode {
+  const parts = value.split(/(`[^`\n]+`)/g);
+  return parts.map((part, i) => {
+    if (part.length >= 2 && part.startsWith("`") && part.endsWith("`")) {
+      return (
+        <code
+          key={i}
+          className="rounded border border-[var(--rule)] bg-[var(--ground)] px-1.5 py-0.5 font-mono text-[12.5px] text-[var(--ink)] break-all"
+        >
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+    return <React.Fragment key={i}>{part}</React.Fragment>;
+  });
+}
+
 export function ChatViewport({
   session,
   turns,
@@ -85,11 +102,22 @@ export function ChatViewport({
 }: ChatViewportProps) {
   const [input, setInput] = useState("");
   const [bypassCache, setBypassCache] = useState(false);
+  const [showQuickScenarios, setShowQuickScenarios] = useState(false);
   const [activeCitationState, setActiveCitationState] = useState<{
     citation: CitationItem;
     index?: number;
   } | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  const threadEndRef = useRef<HTMLDivElement | null>(null);
+
+  const latestTurn = turns.length > 0 ? turns[turns.length - 1] : null;
+  const latestRefused = Boolean(latestTurn?.refusal?.refused);
+  const latestDone = Boolean(latestTurn && !latestTurn.isStreaming);
+
+  useEffect(() => {
+    if (turns.length === 0) return;
+    threadEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [turns.length, latestRefused, latestDone]);
 
   const handleSubmit = (event?: React.FormEvent) => {
     event?.preventDefault();
@@ -97,6 +125,7 @@ export function ChatViewport({
     if (!trimmed || isStreaming || !session) return;
     onSendQuery(trimmed, { bypassCache });
     setInput("");
+    setShowQuickScenarios(false);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -108,6 +137,7 @@ export function ChatViewport({
 
   const handleScenarioClick = (scenario: GuidedScenario) => {
     if (isStreaming || !session) return;
+    setShowQuickScenarios(false);
     onSendQuery(scenario.query, { bypassCache });
   };
 
@@ -148,344 +178,383 @@ export function ChatViewport({
   return (
     <section
       aria-label="Interactive RAG Chat Viewport"
-      className="flex h-full min-h-[540px] min-w-0 flex-col rounded-2xl border border-slate-800/90 bg-slate-900/50 shadow-xl overflow-hidden"
+      className="flex h-full min-h-[540px] min-w-0 flex-col bg-[var(--paper)]"
     >
-      {/* Guided Enterprise Scenario Chips */}
-      <div className="border-b border-slate-800/80 bg-slate-900/90 px-4 py-3">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-            <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-            Guided Enterprise Scenarios
-          </span>
-          <span className="text-[11px] text-slate-500">
-            Active scope:{" "}
-            <span className="font-mono text-slate-300">
-              {session ? `${session.tenant_id}/${session.persona}` : "initializing..."}
-            </span>
-          </span>
-        </div>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {GUIDED_SCENARIOS.map((scenario) => (
-            <button
-              key={scenario.id}
-              type="button"
-              disabled={!session || isStreaming}
-              onClick={() => handleScenarioClick(scenario)}
-              title={scenario.description}
-              className="group flex flex-col items-start rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-left hover:border-indigo-500/50 hover:bg-slate-900 transition-all cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
-            >
-              <div className="flex w-full items-center justify-between gap-2">
-                <span className="text-xs font-semibold text-slate-200 group-hover:text-white">
-                  {scenario.label}
-                </span>
-                <span className="shrink-0 rounded border border-slate-700 bg-slate-800/90 px-1.5 py-0.5 font-mono text-[10px] text-cyan-300">
-                  {scenario.badge}
-                </span>
-              </div>
-              <span className="mt-0.5 line-clamp-1 text-[11px] text-slate-400">
-                {scenario.query}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Conversation Thread */}
-      <div className="flex-1 min-w-0 overflow-y-auto px-4 py-4 space-y-4">
+      {/* Conversation Thread / Empty State */}
+      <div className="min-w-0 flex-1 overflow-y-auto px-5 py-6 sm:px-8">
         {turns.length === 0 ? (
-          <div className="flex h-full min-h-[260px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-800 bg-slate-950/40 p-6 text-center">
-            <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-400">
-              <FileSearch className="h-5 w-5" />
+          <div className="mx-auto flex h-full max-w-[68ch] flex-col justify-center py-6">
+            <div className="mb-6">
+              <h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)]">
+                Ask your authorized knowledge base
+              </h1>
+              <p className="mt-1.5 text-sm leading-relaxed text-[var(--ink-secondary)]">
+                Every query runs pre-retrieval SQL RBAC, hybrid dense + BM25 search, and a{" "}
+                <span className="font-mono text-[13px] text-[var(--ink)]">0.65</span>{" "}
+                Cross-Encoder refusal gate.
+                {session && (
+                  <>
+                    {" "}
+                    Active scope:{" "}
+                    <span className="font-mono text-[12.5px] font-medium text-[var(--ink)]">
+                      {session.tenant_id}
+                    </span>{" "}
+                    ({session.allowed_roles.join(", ")}).
+                  </>
+                )}
+              </p>
             </div>
-            <h3 className="text-sm font-semibold text-slate-200">
-              Ready to Inspect Pre-Retrieval RBAC &amp; Grounded Generation
-            </h3>
-            <p className="mt-1 max-w-md text-xs leading-relaxed text-slate-400">
-              Select a Guided Enterprise Scenario above or submit a custom query. Switch
-              tenants or roles in the PersonaBar and click{" "}
-              <span className="font-medium text-indigo-300">
-                Re-run Last Query Under New Role
-              </span>{" "}
-              to verify zero cross-tenant or cross-role leakage.
-            </p>
+
+            {/* Clean Hairline Scenario List (collapses once first turn begins) */}
+            <div className="border-t border-[var(--rule)]">
+              <div className="flex items-center justify-between py-2.5 text-xs font-medium text-[var(--ink-muted)]">
+                <span>Guided Enterprise Scenarios</span>
+                <span className="hidden sm:inline">Click any row to execute live</span>
+              </div>
+              <div className="divide-y divide-[var(--rule)] border-t border-b border-[var(--rule)]">
+                {GUIDED_SCENARIOS.map((scenario) => (
+                  <button
+                    key={scenario.id}
+                    type="button"
+                    disabled={isStreaming || !session}
+                    onClick={() => handleScenarioClick(scenario)}
+                    className="group flex w-full items-start justify-between gap-4 py-3 text-left transition-colors duration-150 hover:bg-[var(--ground)]/70 px-2.5 -mx-2.5 rounded cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-semibold text-[var(--ink)] group-hover:text-[var(--copper)] transition-colors">
+                          {scenario.label}
+                        </span>
+                        <span className="rounded border border-[var(--rule)] bg-[var(--ground)] px-1.5 py-0.5 font-mono text-[10.5px] font-medium text-[var(--ink-secondary)]">
+                          {scenario.badge}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-xs leading-relaxed text-[var(--ink-secondary)]">
+                        {scenario.query}
+                      </p>
+                    </div>
+                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[var(--ink-muted)] transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[var(--copper)]" />
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
-          turns.map((turn) => {
-            const enrichedCitations =
-              enrichedCitationsByTurn.get(turn.id) ?? turn.citations;
-            const segments = parseTextWithCitations(turn.content);
-            const isSelected = selectedTurnId === turn.id;
+          <div className="mx-auto max-w-[74ch] divide-y divide-[var(--rule)]">
+            {turns.map((turn) => {
+              const isSelected = selectedTurnId === turn.id;
+              const enrichedCitations =
+                enrichedCitationsByTurn.get(turn.id) ?? turn.citations;
+              const parsedSegments = parseTextWithCitations(turn.content);
 
-            return (
-              <article
-                key={turn.id}
-                onClick={() => onSelectTurn?.(turn.id)}
-                className={`rounded-2xl border p-4 transition-colors ${
-                  isSelected
-                    ? "border-indigo-500/60 bg-slate-900/90 shadow-lg shadow-indigo-950/20"
-                    : "border-slate-800/90 bg-slate-950/60 hover:border-slate-700"
-                }`}
-              >
-                {/* User Query Header */}
-                <div className="mb-3 flex flex-wrap items-start justify-between gap-2 border-b border-slate-800/80 pb-3">
-                  <div className="flex items-start gap-2.5 min-w-0">
-                    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-200 border border-slate-700">
-                      <User className="h-3.5 w-3.5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-white break-words">
-                        {turn.query}
-                      </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400">
-                        <span className="inline-flex items-center gap-1 font-mono text-slate-300">
-                          <Lock className="h-3 w-3 text-emerald-400" />
+              return (
+                <article
+                  key={turn.id}
+                  onClick={() => onSelectTurn?.(turn.id)}
+                  className={`py-6 first:pt-1 transition-colors duration-150 ${
+                    onSelectTurn ? "cursor-pointer" : ""
+                  }`}
+                >
+                  {/* User Query Header */}
+                  <div
+                    className={`rounded border px-4 py-3 transition-colors ${
+                      isSelected
+                        ? "border-[var(--copper-rule)] bg-[var(--ground)]/85"
+                        : "border-[var(--rule)] bg-[var(--ground)]/45 hover:border-[var(--rule-strong)]"
+                    }`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[var(--ink-muted)]">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-mono font-medium text-[var(--ink-secondary)]">
                           {turn.tenant_id}
                         </span>
-                        <span>·</span>
-                        <span className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-indigo-300">
+                        <span>/</span>
+                        <span className="font-mono text-[var(--ink-secondary)]">
                           {turn.persona}
                         </span>
-                        <span className="font-mono text-[10px] text-slate-500">
+                        <span className="font-mono text-[10.5px]">
                           scope:{turn.scope_hash.slice(0, 8)}
                         </span>
                       </div>
+
+                      <div className="flex items-center gap-2">
+                        {turn.cacheHit && (
+                          <span className="inline-flex items-center gap-1 rounded border border-[var(--jade-rule)] bg-[var(--jade-soft)] px-1.5 py-0.5 font-mono text-[10.5px] font-semibold text-[var(--jade)]">
+                            <Zap className="h-3 w-3" />
+                            Semantic Cache HIT
+                            {typeof turn.totalLatencyMs === "number"
+                              ? ` (~${Math.round(turn.totalLatencyMs)}ms)`
+                              : ""}
+                          </span>
+                        )}
+                        {typeof turn.totalLatencyMs === "number" && (
+                          <span className="font-mono tabular-nums text-[11px] text-[var(--ink-muted)]">
+                            {turn.totalLatencyMs.toFixed(0)} ms
+                          </span>
+                        )}
+                        {isSelected && (
+                          <span className="text-[10.5px] font-semibold text-[var(--copper)]">
+                            Inspecting
+                          </span>
+                        )}
+                      </div>
                     </div>
+
+                    <p className="mt-1.5 text-[15px] font-semibold leading-snug text-[var(--ink)]">
+                      {turn.query}
+                    </p>
                   </div>
 
-                  {/* Status / Cache / Latency Pills */}
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {turn.cacheHit && (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300">
-                        <Zap className="h-3 w-3" />
-                        Semantic Cache HIT (
-                        {turn.totalLatencyMs !== null
-                          ? `~${Math.round(turn.totalLatencyMs)}ms`
-                          : "~20ms"}
-                        )
-                      </span>
-                    )}
-                    {turn.totalLatencyMs !== null && !turn.cacheHit && (
-                      <span className="rounded-full border border-slate-700 bg-slate-800/90 px-2 py-0.5 font-mono text-[11px] text-slate-300">
-                        {turn.totalLatencyMs.toFixed(0)} ms
-                      </span>
-                    )}
-                    {turn.isStreaming && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/40 bg-indigo-500/15 px-2.5 py-0.5 text-[11px] font-medium text-indigo-300">
-                        <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-ping" />
-                        Streaming
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Assistant / Refusal Response Body */}
-                <div className="flex items-start gap-2.5">
-                  <div
-                    className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border ${
-                      turn.refusal?.refused
-                        ? "bg-amber-500/15 border-amber-500/40 text-amber-300"
-                        : "bg-indigo-500/15 border-indigo-500/40 text-indigo-300"
-                    }`}
-                  >
+                  {/* Assistant Response Area */}
+                  <div className="mt-4 pl-1">
+                    {/* Deterministic Refusal Banner */}
                     {turn.refusal?.refused ? (
-                      <ShieldAlert className="h-3.5 w-3.5" />
-                    ) : (
-                      <Bot className="h-3.5 w-3.5" />
-                    )}
-                  </div>
-
-                  <div className="min-w-0 flex-1 space-y-3">
-                    {/* Deterministic Refusal Gate Alert Banner */}
-                    {turn.refusal?.refused && (
                       <div
                         role="alert"
-                        className="rounded-xl border border-amber-500/50 bg-gradient-to-br from-amber-950/60 via-rose-950/35 to-slate-950 p-4 shadow-inner"
+                        className="rounded border border-[var(--crimson-rule)] bg-[var(--crimson-soft)] p-4"
                       >
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 text-amber-200">
-                            <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0" />
-                            <span className="text-xs font-bold uppercase tracking-wider">
-                              Deterministic Refusal Gate Triggered
-                            </span>
-                          </div>
-                          <span className="rounded-md border border-rose-500/40 bg-rose-500/15 px-2 py-0.5 font-mono text-[11px] font-semibold text-rose-200">
-                            {turn.refusal.reason ?? "below_confidence_threshold"}
-                          </span>
-                        </div>
+                        <div className="flex items-start gap-3">
+                          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-[var(--crimson)]" />
+                          <div className="min-w-0 flex-1 space-y-2">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <h3 className="text-sm font-semibold text-[var(--crimson)]">
+                                Deterministic Refusal Gate Triggered
+                              </h3>
+                              <span className="rounded border border-[var(--crimson-rule)] bg-[var(--paper)] px-2 py-0.5 font-mono text-[11px] font-medium text-[var(--crimson)]">
+                                {turn.refusal.reason}
+                              </span>
+                            </div>
 
-                        <p className="mt-2 text-sm leading-relaxed text-amber-100">
-                          {turn.refusal.message}
-                        </p>
+                            <p className="max-w-[65ch] text-sm leading-relaxed text-[var(--ink)]">
+                              {turn.refusal.message}
+                            </p>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-amber-500/20 pt-2.5 text-xs">
-                          <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900/90 px-2 py-1 font-mono text-[11px] text-slate-200">
-                            Top Cross-Encoder Score:{" "}
-                            <strong className="text-rose-300">
-                              {turn.refusal.top_score.toFixed(4)}
-                            </strong>{" "}
-                            &lt; {turn.refusal.threshold.toFixed(2)} Threshold
-                          </span>
-
-                          <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/40 bg-emerald-500/15 px-2.5 py-1 font-mono text-[11px] font-semibold text-emerald-300">
-                            <Cpu className="h-3.5 w-3.5" />
-                            LLM Called: FALSE (0 Tokens Spent — Hallucination Prevented)
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Streamed Answer with Inline Clickable [chunk_id] Badges */}
-                    {turn.content && (
-                      <div className="text-sm leading-relaxed text-slate-200 whitespace-pre-wrap break-words">
-                        {segments.map((segment, idx) => {
-                          if (segment.type === "text") {
-                            return <React.Fragment key={idx}>{segment.value}</React.Fragment>;
-                          }
-
-                          const citIndex = enrichedCitations.findIndex(
-                            (c) =>
-                              c.chunk_id === segment.chunkId ||
-                              c.chunk_id
-                                .toLowerCase()
-                                .startsWith(segment.chunkId.toLowerCase())
-                          );
-                          const matchedCitation =
-                            citIndex >= 0 ? enrichedCitations[citIndex] : undefined;
-
-                          return (
-                            <button
-                              key={`${segment.chunkId}-${idx}`}
-                              type="button"
-                              disabled={!matchedCitation}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (matchedCitation) {
-                                  openCitationModal(
-                                    turn,
-                                    segment.chunkId,
-                                    matchedCitation,
-                                    citIndex
-                                  );
-                                }
-                              }}
-                              title={
-                                matchedCitation
-                                  ? `Inspect source: ${matchedCitation.document_title} (${(
-                                      matchedCitation.rerank_score * 100
-                                    ).toFixed(1)}%)`
-                                  : `Source chunk ${segment.chunkId}`
-                              }
-                              className={`mx-0.5 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 align-baseline font-mono text-[11px] font-semibold transition-colors ${
-                                matchedCitation
-                                  ? "border-cyan-500/40 bg-cyan-500/15 text-cyan-300 hover:bg-cyan-500/30 hover:text-white cursor-pointer"
-                                  : "border-slate-700 bg-slate-800 text-slate-400 cursor-default"
-                              }`}
-                            >
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[var(--crimson-rule)]/70 pt-2 font-mono text-[11px] tabular-nums text-[var(--ink-secondary)]">
                               <span>
-                                {citIndex >= 0
-                                  ? `[#${citIndex + 1} · ${segment.chunkId.slice(0, 8)}]`
-                                  : segment.raw}
+                                Top Cross-Encoder:{" "}
+                                <strong className="text-[var(--crimson)]">
+                                  {turn.refusal.top_score.toFixed(4)}
+                                </strong>{" "}
+                                &lt; {turn.refusal.threshold.toFixed(2)}
                               </span>
-                            </button>
-                          );
-                        })}
+                              <span>
+                                LLM Called:{" "}
+                                <strong className="text-[var(--jade)]">
+                                  FALSE (0 Tokens Spent — Hallucination Prevented)
+                                </strong>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    )}
-
-                    {turn.isStreaming && !turn.content && !turn.refusal && (
-                      <div className="flex items-center gap-2 text-xs text-slate-400">
-                        <span className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
-                        Executing 6-Step RBAC RAG Pipeline...
-                      </div>
-                    )}
-
-                    {turn.error && (
+                    ) : turn.error ? (
                       <div
                         role="alert"
-                        className="rounded-xl border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-xs text-rose-200"
+                        className="flex items-start gap-2.5 rounded border border-[var(--crimson-rule)] bg-[var(--crimson-soft)] p-3.5 text-sm text-[var(--crimson)]"
                       >
-                        Pipeline Error: {turn.error}
+                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                        <div>
+                          <div className="font-semibold">
+                            Pipeline request failed
+                          </div>
+                          <p className="mt-0.5 text-xs text-[var(--ink)]">
+                            {turn.error}
+                          </p>
+                        </div>
                       </div>
-                    )}
-
-                    {/* Source Citation Footer Pills */}
-                    {enrichedCitations.length > 0 && (
-                      <div className="border-t border-slate-800/80 pt-2.5">
-                        <div className="mb-1.5 flex items-center justify-between">
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-                            Verified Sources ({enrichedCitations.length})
-                          </span>
-                          <span className="text-[10px] text-slate-500">
-                            Click any citation to inspect chunk text &amp; RRF ranks
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {enrichedCitations.map((citation, idx) => (
-                            <button
-                              key={citation.chunk_id}
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openCitationModal(
-                                  turn,
-                                  citation.chunk_id,
-                                  citation,
-                                  idx
+                    ) : (
+                      <div className="space-y-4">
+                        {/* Grounded Streaming Prose (68ch reading measure) */}
+                        <div className="max-w-[68ch] whitespace-pre-wrap break-words text-[15px] leading-[1.68] text-[var(--ink)]">
+                          {parsedSegments.length > 0 ? (
+                            parsedSegments.map((seg, idx) => {
+                              if (seg.type === "text") {
+                                return (
+                                  <React.Fragment key={idx}>
+                                    {renderFormattedText(seg.value)}
+                                  </React.Fragment>
                                 );
-                              }}
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700/80 bg-slate-900 px-2.5 py-1 text-left text-xs text-slate-200 hover:border-cyan-500/50 hover:bg-slate-800 transition-colors cursor-pointer"
-                            >
-                              <span className="font-mono text-[10px] font-semibold text-cyan-400">
-                                #{idx + 1}
-                              </span>
-                              <span className="max-w-[180px] truncate font-medium">
-                                {citation.document_title}
-                              </span>
-                              <span className="font-mono text-[10px] text-emerald-300">
-                                {(citation.rerank_score * 100).toFixed(1)}%
-                              </span>
-                            </button>
-                          ))}
+                              }
+
+                              const citIndex = enrichedCitations.findIndex(
+                                (c) =>
+                                  c.chunk_id === seg.chunkId ||
+                                  c.chunk_id
+                                    .toLowerCase()
+                                    .startsWith(seg.chunkId.toLowerCase())
+                              );
+                              const matchedCitation =
+                                citIndex >= 0
+                                  ? enrichedCitations[citIndex]
+                                  : undefined;
+                              const shortLabel =
+                                citIndex >= 0
+                                  ? `#${citIndex + 1} · ${seg.chunkId.slice(0, 8)}`
+                                  : seg.chunkId.slice(0, 8);
+
+                              return (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openCitationModal(
+                                      turn,
+                                      seg.chunkId,
+                                      matchedCitation,
+                                      citIndex >= 0 ? citIndex : undefined
+                                    );
+                                  }}
+                                  title={
+                                    matchedCitation
+                                      ? `${matchedCitation.document_title} — ${matchedCitation.section_header} (${(
+                                          matchedCitation.rerank_score * 100
+                                        ).toFixed(1)}%)`
+                                      : `Inspect source chunk ${seg.chunkId}`
+                                  }
+                                  className="mx-0.5 inline-flex items-center rounded border border-[var(--copper-rule)] bg-[var(--copper-soft)] px-1.5 py-0.5 align-baseline font-mono text-[11px] font-semibold text-[var(--copper)] transition-colors duration-150 hover:border-[var(--copper)] hover:bg-[var(--copper)] hover:text-[#FCFBF8] cursor-pointer"
+                                >
+                                  [{shortLabel}]
+                                </button>
+                              );
+                            })
+                          ) : turn.isStreaming ? (
+                            <div className="space-y-2 py-1" aria-live="polite">
+                              <div className="h-3.5 w-3/4 animate-pulse rounded bg-[var(--mineral)]" />
+                              <div className="h-3.5 w-1/2 animate-pulse rounded bg-[var(--mineral)]" />
+                              <p className="pt-1 font-mono text-xs text-[var(--ink-muted)]">
+                                Executing RBAC retrieval &amp; Cross-Encoder verification…
+                              </p>
+                            </div>
+                          ) : null}
+
+                          {turn.isStreaming && turn.content.length > 0 && (
+                            <span
+                              aria-hidden="true"
+                              className="ml-0.5 inline-block h-4 w-1.5 translate-y-0.5 bg-[var(--copper)]"
+                            />
+                          )}
                         </div>
+
+                        {/* Verified Sources Hairline Strip */}
+                        {enrichedCitations.length > 0 && (
+                          <div className="border-t border-[var(--rule)] pt-3">
+                            <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+                              <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--ink-secondary)]">
+                                <FileSearch className="h-3.5 w-3.5 text-[var(--jade)]" />
+                                Verified Sources ({enrichedCitations.length})
+                              </span>
+                              <span className="text-[11px] text-[var(--ink-muted)]">
+                                Select a source to inspect chunk text, ACL &amp; RRF ranks
+                              </span>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                              {enrichedCitations.map((cit, citIdx) => (
+                                <button
+                                  key={cit.chunk_id}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openCitationModal(
+                                      turn,
+                                      cit.chunk_id,
+                                      cit,
+                                      citIdx
+                                    );
+                                  }}
+                                  className="inline-flex max-w-full items-center gap-2 rounded border border-[var(--rule)] bg-[var(--ground)] px-2.5 py-1 text-left text-xs text-[var(--ink)] transition-colors duration-150 hover:border-[var(--copper)] hover:bg-[var(--copper-soft)] cursor-pointer"
+                                >
+                                  <span className="font-mono text-[11px] font-semibold text-[var(--copper)]">
+                                    #{citIdx + 1}
+                                  </span>
+                                  <span className="max-w-[200px] truncate font-medium">
+                                    {cit.document_title}
+                                  </span>
+                                  <span className="font-mono text-[11px] tabular-nums text-[var(--jade)]">
+                                    {(cit.rerank_score * 100).toFixed(1)}%
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                </div>
-              </article>
-            );
-          })
+                </article>
+              );
+            })}
+            <div ref={threadEndRef} aria-hidden="true" className="h-1" />
+          </div>
         )}
       </div>
+
+      {/* Collapsible Preset Scenarios Strip (available once chat has started) */}
+      {turns.length > 0 && showQuickScenarios && (
+        <div className="border-t border-[var(--rule)] bg-[var(--ground)] px-5 py-3 sm:px-8">
+          <div className="mx-auto max-w-[74ch]">
+            <div className="mb-2 flex items-center justify-between text-xs font-medium text-[var(--ink-secondary)]">
+              <span>Guided Enterprise Scenarios</span>
+              <button
+                type="button"
+                onClick={() => setShowQuickScenarios(false)}
+                className="text-[var(--ink-muted)] hover:text-[var(--ink)] cursor-pointer"
+              >
+                Hide
+              </button>
+            </div>
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {GUIDED_SCENARIOS.map((scenario) => (
+                <button
+                  key={scenario.id}
+                  type="button"
+                  disabled={isStreaming || !session}
+                  onClick={() => handleScenarioClick(scenario)}
+                  className="flex items-center justify-between gap-2 rounded border border-[var(--rule)] bg-[var(--paper)] px-3 py-2 text-left text-xs transition-colors hover:border-[var(--copper)] cursor-pointer disabled:opacity-50"
+                >
+                  <span className="truncate font-medium text-[var(--ink)]">
+                    {scenario.label}
+                  </span>
+                  <span className="shrink-0 font-mono text-[10px] text-[var(--ink-muted)]">
+                    {scenario.badge}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Query Composer */}
       <form
         onSubmit={handleSubmit}
-        className="border-t border-slate-800/90 bg-slate-900/95 p-3"
+        className="border-t border-[var(--rule)] bg-[var(--paper)] px-5 py-3.5 sm:px-8"
       >
-        <div className="flex flex-col gap-2">
-          <div className="flex items-end gap-2">
+        <div className="mx-auto max-w-[74ch]">
+          <div className="flex items-end gap-2 rounded-[5px] border border-[var(--rule-strong)] bg-[var(--paper)] p-1.5 transition-colors focus-within:border-[var(--copper)]">
             <textarea
               ref={inputRef}
               rows={2}
               value={input}
-              onChange={(event) => setInput(event.target.value)}
+              onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={!session || isStreaming}
               placeholder={
                 session
-                  ? `Ask a question as ${session.tenant_id} (${session.persona})...`
-                  : "Initializing JWT security session..."
+                  ? `Ask a question as ${session.tenant_id} (${session.persona})…`
+                  : "Initializing security session…"
               }
-              aria-label="Enterprise RAG query input"
-              className="flex-1 min-w-0 resize-none rounded-xl border border-slate-700/90 bg-slate-950 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50"
+              aria-label="Ask enterprise RAG question"
+              className="max-h-36 min-h-[44px] flex-1 resize-none bg-transparent px-2.5 py-2 text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus:outline-none disabled:opacity-60"
             />
 
             {isStreaming && onStopStreaming ? (
               <button
                 type="button"
                 onClick={onStopStreaming}
-                className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border border-rose-500/50 bg-rose-600/20 px-4 text-xs font-semibold text-rose-200 hover:bg-rose-600/35 transition-colors cursor-pointer"
+                aria-label="Stop streaming response"
+                className="inline-flex h-10 items-center gap-1.5 rounded bg-[var(--crimson)] px-3.5 text-xs font-semibold text-[#FCFBF8] transition-colors hover:bg-[#8e2020] cursor-pointer"
               >
                 <Square className="h-3.5 w-3.5 fill-current" />
                 Stop
@@ -493,34 +562,52 @@ export function ChatViewport({
             ) : (
               <button
                 type="submit"
-                disabled={!session || isStreaming || !input.trim()}
-                className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-indigo-600 px-4 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={!input.trim() || !session || isStreaming}
+                aria-label="Send query"
+                className="inline-flex h-10 items-center gap-1.5 rounded bg-[var(--copper)] px-4 text-xs font-semibold text-[#FCFBF8] transition-colors duration-150 hover:bg-[var(--copper-hover)] active:translate-y-px cursor-pointer disabled:cursor-not-allowed disabled:opacity-45"
               >
-                <ArrowUp className="h-4 w-4" />
-                Send
+                <span>Ask</span>
+                <ArrowUp className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-slate-400">
-            <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={bypassCache}
-                onChange={(e) => setBypassCache(e.target.checked)}
-                className="h-3.5 w-3.5 rounded border-slate-700 bg-slate-950 text-indigo-500 focus:ring-indigo-500"
-              />
-              <span>Bypass Step 2 Semantic Cache (force live Hybrid RRF + Rerank)</span>
-            </label>
-            <span className="text-slate-500">
-              Press <kbd className="rounded bg-slate-800 px-1 py-0.5 font-mono text-[10px]">Enter</kbd> to send ·{" "}
-              <kbd className="rounded bg-slate-800 px-1 py-0.5 font-mono text-[10px]">Shift+Enter</kbd> for newline
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--ink-muted)]">
+            <div className="flex flex-wrap items-center gap-4">
+              <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={bypassCache}
+                  onChange={(e) => setBypassCache(e.target.checked)}
+                  className="h-3.5 w-3.5 rounded border-[var(--rule-strong)] accent-[var(--copper)]"
+                />
+                <span>Bypass semantic cache</span>
+              </label>
+
+              {turns.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowQuickScenarios((prev) => !prev)}
+                  className="inline-flex items-center gap-1 font-medium text-[var(--ink-secondary)] hover:text-[var(--copper)] cursor-pointer"
+                >
+                  <span>Guided Scenarios</span>
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform duration-150 ${
+                      showQuickScenarios ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+              )}
+            </div>
+
+            <span className="hidden sm:inline">
+              Enter to send · Shift+Enter for newline
             </span>
           </div>
         </div>
       </form>
 
-      {/* Source Inspection Popover */}
+      {/* Source Inspection Modal */}
       <CitationPopover
         citation={activeCitationState?.citation ?? null}
         citationIndex={activeCitationState?.index}
