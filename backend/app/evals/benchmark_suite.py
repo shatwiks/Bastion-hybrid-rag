@@ -315,6 +315,7 @@ class ComparativeBenchmarkRunner:
             openai_api_key="",
             gemini_api_key="",
             anthropic_api_key="",
+            ollama_api_base="",
         )
         self._orchestrator = self._build_enterprise_orchestrator()
 
@@ -328,6 +329,7 @@ class ComparativeBenchmarkRunner:
                 openai_api_key="",
                 gemini_api_key="",
                 anthropic_api_key="",
+                ollama_api_base="",
             ),
             refusal_gate=RefusalGateService(reranker=self.reranker_service),
             grounded_generator=self._offline_generator,

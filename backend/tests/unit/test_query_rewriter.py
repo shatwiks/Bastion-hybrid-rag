@@ -137,3 +137,40 @@ async def test_multi_turn_llm_exception_falls_back_gracefully(
     assert "SKU-GLX-500" in result.rewritten_query
     assert "ERR_401_SEC_REVOKED" in result.rewritten_query
     assert "--enable-read-replica" in result.rewritten_query
+
+
+@pytest.mark.asyncio
+async def test_multi_turn_ollama_rewrite_passes_api_base_without_api_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+
+    mock_acompletion = AsyncMock(
+        return_value=_make_llm_response(
+            "How do I release stale leases for ERR_409_CONFLICT on Acme Cloud Storage?"
+        )
+    )
+    monkeypatch.setattr("app.services.query_rewriter.litellm.acompletion", mock_acompletion)
+
+    service = QueryRewriterService(
+        model="ollama_chat/llama3.2",
+        ollama_api_base="http://localhost:11434/",
+    )
+    history = [
+        ChatMessage(role="user", content="What causes ERR_409_CONFLICT in Acme Cloud Storage?"),
+        ChatMessage(role="assistant", content="Concurrent sync lock contention."),
+    ]
+    result = await service.rewrite(
+        query="How do I release its stale leases?",
+        chat_history=history,
+    )
+
+    mock_acompletion.assert_awaited_once()
+    call_kwargs = mock_acompletion.call_args.kwargs
+    assert call_kwargs["model"] == "ollama_chat/llama3.2"
+    assert call_kwargs["api_base"] == "http://localhost:11434"
+    assert "api_key" not in call_kwargs
+    assert result.was_rewritten is True
+    assert "ERR_409_CONFLICT" in result.rewritten_query

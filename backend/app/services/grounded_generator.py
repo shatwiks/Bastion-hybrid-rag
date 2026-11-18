@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import os
 import re
 from collections.abc import AsyncIterator
 from typing import Any
@@ -10,6 +9,7 @@ import litellm
 from app.config import get_settings
 from app.retrievers.base import RetrievedChunk
 from app.schemas.retrieval import ChatMessage
+from app.services.llm_provider import ResolvedLLMTarget, resolve_llm_target
 from app.services.query_rewriter import extract_technical_tokens
 from app.services.refusal_gate import VERIFIED_REFUSAL_MESSAGE
 
@@ -151,6 +151,8 @@ class GroundedGeneratorService:
         openai_api_key: str | None = None,
         gemini_api_key: str | None = None,
         anthropic_api_key: str | None = None,
+        ollama_api_base: str | None = None,
+        ollama_api_key: str | None = None,
         max_context_chunks: int = 5,
     ) -> None:
         settings = get_settings()
@@ -159,6 +161,8 @@ class GroundedGeneratorService:
         self._openai_api_key = openai_api_key
         self._gemini_api_key = gemini_api_key
         self._anthropic_api_key = anthropic_api_key
+        self._ollama_api_base = ollama_api_base
+        self._ollama_api_key = ollama_api_key
         self.max_context_chunks = max_context_chunks
         self.last_mode: str = "offline_deterministic"
         self.last_token_usage: dict[str, int] = {
@@ -167,30 +171,17 @@ class GroundedGeneratorService:
             "total_tokens": 0,
         }
 
-    def _resolve_api_key(self) -> str | None:
-        """Select the configured API key matching the active LiteLLM model provider."""
-        openai_key = (
-            self._openai_api_key
-            if self._openai_api_key is not None
-            else (os.environ.get("OPENAI_API_KEY") or self._settings.OPENAI_API_KEY)
+    def _resolve_target(self) -> ResolvedLLMTarget:
+        """Select the configured Cloud LLM or local Ollama target for LiteLLM."""
+        return resolve_llm_target(
+            self.model,
+            openai_api_key=self._openai_api_key,
+            gemini_api_key=self._gemini_api_key,
+            anthropic_api_key=self._anthropic_api_key,
+            ollama_api_base=self._ollama_api_base,
+            ollama_api_key=self._ollama_api_key,
+            settings=self._settings,
         )
-        gemini_key = (
-            self._gemini_api_key
-            if self._gemini_api_key is not None
-            else (os.environ.get("GEMINI_API_KEY") or self._settings.GEMINI_API_KEY)
-        )
-        anthropic_key = (
-            self._anthropic_api_key
-            if self._anthropic_api_key is not None
-            else (os.environ.get("ANTHROPIC_API_KEY") or self._settings.ANTHROPIC_API_KEY)
-        )
-
-        model_lower = self.model.lower()
-        if "gemini" in model_lower:
-            return gemini_key.strip() if gemini_key and gemini_key.strip() else None
-        if "claude" in model_lower or "anthropic" in model_lower:
-            return anthropic_key.strip() if anthropic_key and anthropic_key.strip() else None
-        return openai_key.strip() if openai_key and openai_key.strip() else None
 
     def build_system_prompt(self, chunks: list[RetrievedChunk]) -> str:
         """Construct a strict zero-hallucination system prompt with formatted [chunk_id] blocks."""
@@ -284,28 +275,33 @@ class GroundedGeneratorService:
 
         messages = self.build_messages(query=query, chunks=selected, chat_history=chat_history)
         prompt_tokens = sum(_estimate_tokens(m["content"]) for m in messages)
-        api_key = self._resolve_api_key()
+        target = self._resolve_target()
 
-        if api_key:
-            self.last_mode = "cloud_llm"
+        if target.enabled:
+            self.last_mode = "ollama_local" if target.provider == "ollama" else "cloud_llm"
             completion_parts: list[str] = []
             try:
                 response: Any = await litellm.acompletion(
-                    model=self.model,
+                    **target.acompletion_kwargs(),
                     messages=messages,
                     stream=True,
                     temperature=0.0,
-                    api_key=api_key,
+                    timeout=60.0,
                 )
-                async for chunk in response:
-                    choices = getattr(chunk, "choices", None) or []
-                    if not choices:
-                        continue
-                    delta_obj = getattr(choices[0], "delta", None)
-                    delta_text = getattr(delta_obj, "content", None) if delta_obj else None
-                    if delta_text:
-                        completion_parts.append(delta_text)
-                        yield delta_text
+                try:
+                    async for chunk in response:
+                        choices = getattr(chunk, "choices", None) or []
+                        if not choices:
+                            continue
+                        delta_obj = getattr(choices[0], "delta", None)
+                        delta_text = getattr(delta_obj, "content", None) if delta_obj else None
+                        if delta_text:
+                            completion_parts.append(delta_text)
+                            yield delta_text
+                except TypeError:
+                    # Ollama async streams in LiteLLM can terminate with a None chunk causing TypeError
+                    if not completion_parts:
+                        raise
 
                 full_text = "".join(completion_parts)
                 completion_tokens = _estimate_tokens(full_text)
@@ -316,8 +312,21 @@ class GroundedGeneratorService:
                 }
                 return
             except Exception as exc:  # noqa: BLE001
+                if completion_parts:
+                    logger.warning(
+                        "LLM stream interrupted after partial output (%s); keeping streamed tokens.",
+                        exc,
+                    )
+                    full_text = "".join(completion_parts)
+                    completion_tokens = _estimate_tokens(full_text)
+                    self.last_token_usage = {
+                        "prompt_tokens": prompt_tokens,
+                        "completion_tokens": completion_tokens,
+                        "total_tokens": prompt_tokens + completion_tokens,
+                    }
+                    return
                 logger.warning(
-                    "Cloud LLM streaming failed (%s); falling back to offline grounded synthesis.",
+                    "LLM streaming failed (%s); falling back to offline grounded synthesis.",
                     exc,
                 )
 

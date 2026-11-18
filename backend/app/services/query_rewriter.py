@@ -1,5 +1,4 @@
 import logging
-import os
 import re
 import time
 
@@ -7,6 +6,7 @@ import litellm
 
 from app.config import get_settings
 from app.schemas.retrieval import ChatMessage, QueryRewriteResult
+from app.services.llm_provider import ResolvedLLMTarget, resolve_llm_target
 from app.services.token_expansion import TECHNICAL_TOKEN_REGEX
 
 logger = logging.getLogger("rag_engine.query_rewriter")
@@ -62,6 +62,8 @@ class QueryRewriterService:
         openai_api_key: str | None = None,
         gemini_api_key: str | None = None,
         anthropic_api_key: str | None = None,
+        ollama_api_base: str | None = None,
+        ollama_api_key: str | None = None,
         max_history_turns: int = 6,
     ) -> None:
         settings = get_settings()
@@ -70,32 +72,21 @@ class QueryRewriterService:
         self._openai_api_key = openai_api_key
         self._gemini_api_key = gemini_api_key
         self._anthropic_api_key = anthropic_api_key
+        self._ollama_api_base = ollama_api_base
+        self._ollama_api_key = ollama_api_key
         self.max_history_turns = max_history_turns
 
-    def _resolve_api_key(self) -> str | None:
-        """Select the configured API key matching the active LiteLLM model provider."""
-        openai_key = (
-            self._openai_api_key
-            if self._openai_api_key is not None
-            else (os.environ.get("OPENAI_API_KEY") or self._settings.OPENAI_API_KEY)
+    def _resolve_target(self) -> ResolvedLLMTarget:
+        """Select the configured Cloud LLM or local Ollama target for LiteLLM."""
+        return resolve_llm_target(
+            self.model,
+            openai_api_key=self._openai_api_key,
+            gemini_api_key=self._gemini_api_key,
+            anthropic_api_key=self._anthropic_api_key,
+            ollama_api_base=self._ollama_api_base,
+            ollama_api_key=self._ollama_api_key,
+            settings=self._settings,
         )
-        gemini_key = (
-            self._gemini_api_key
-            if self._gemini_api_key is not None
-            else (os.environ.get("GEMINI_API_KEY") or self._settings.GEMINI_API_KEY)
-        )
-        anthropic_key = (
-            self._anthropic_api_key
-            if self._anthropic_api_key is not None
-            else (os.environ.get("ANTHROPIC_API_KEY") or self._settings.ANTHROPIC_API_KEY)
-        )
-
-        model_lower = self.model.lower()
-        if "gemini" in model_lower:
-            return gemini_key.strip() if gemini_key and gemini_key.strip() else None
-        if "claude" in model_lower or "anthropic" in model_lower:
-            return anthropic_key.strip() if anthropic_key and anthropic_key.strip() else None
-        return openai_key.strip() if openai_key and openai_key.strip() else None
 
     @staticmethod
     def _enforce_token_preservation(rewritten: str, preserved_tokens: list[str]) -> str:
@@ -122,7 +113,7 @@ class QueryRewriterService:
         self,
         query: str,
         chat_history: list[ChatMessage],
-        api_key: str,
+        target: ResolvedLLMTarget,
     ) -> str:
         """Invoke LiteLLM asynchronously to resolve multi-turn references into a standalone query."""
         recent_history = chat_history[-self.max_history_turns :]
@@ -140,11 +131,11 @@ class QueryRewriterService:
 
         try:
             response = await litellm.acompletion(
-                model=self.model,
+                **target.acompletion_kwargs(),
                 messages=messages,
                 temperature=0.0,
                 max_tokens=200,
-                api_key=api_key,
+                timeout=30.0,
             )
             content = response.choices[0].message.content or ""
             rewritten = content.strip().strip('"').strip("'")
@@ -177,9 +168,9 @@ class QueryRewriterService:
                 latency_ms=latency_ms,
             )
 
-        api_key = self._resolve_api_key()
-        if api_key:
-            rewritten = await self._rewrite_with_llm(cleaned_query, chat_history, api_key)
+        target = self._resolve_target()
+        if target.enabled:
+            rewritten = await self._rewrite_with_llm(cleaned_query, chat_history, target)
         else:
             rewritten = self._deterministic_rewrite(cleaned_query, chat_history)
 

@@ -315,10 +315,16 @@ class RagasCohortEvaluator:
             openai_api_key="",
             gemini_api_key="",
             anthropic_api_key="",
+            ollama_api_base="",
         )
         semantic_cache = SemanticCacheService()
         refusal_gate = RefusalGateService(reranker=self.reranker_service)
-        grounded_generator = GroundedGeneratorService()
+        grounded_generator = GroundedGeneratorService(
+            openai_api_key="",
+            gemini_api_key="",
+            anthropic_api_key="",
+            ollama_api_base="",
+        )
         telemetry = TelemetryService(max_traces=200, public_key="", secret_key="")
 
         self._orchestrator = RAGPipelineOrchestrator(

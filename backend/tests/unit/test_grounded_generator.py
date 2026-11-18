@@ -314,3 +314,78 @@ async def test_refusal_gate_lazy_warms_unwarmed_reranker_and_tolerates_stub_with
     await gate.evaluate("ERR_409_CONFLICT", [chunk])
     assert lazy_reranker.warmup_calls == 1
 
+
+@pytest.mark.asyncio
+async def test_stream_answer_ollama_passes_api_base_and_handles_trailing_type_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Ollama model prefix streams via api_base without requiring a cloud API key."""
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+
+    chunk = _make_chunk(
+        0,
+        "Run `acme-storage-cli locks inspect` to identify the conflicting lease.",
+    )
+    service = GroundedGeneratorService(
+        model="ollama_chat/llama3.2",
+        ollama_api_base="http://localhost:11434/",
+    )
+
+    async def _fake_ollama_stream():
+        yield SimpleNamespace(
+            choices=[SimpleNamespace(delta=SimpleNamespace(content="Use `acme-storage-cli` "))]
+        )
+        yield SimpleNamespace(
+            choices=[SimpleNamespace(delta=SimpleNamespace(content=f"[{chunk.chunk_id}]."))]
+        )
+        raise TypeError("NoneType object is not subscriptable")
+
+    with patch(
+        "app.services.grounded_generator.litellm.acompletion",
+        new=AsyncMock(return_value=_fake_ollama_stream()),
+    ) as mock_acompletion:
+        tokens = [
+            delta
+            async for delta in service.stream_answer("How do I inspect leases?", [chunk])
+        ]
+
+    assert "".join(tokens) == f"Use `acme-storage-cli` [{chunk.chunk_id}]."
+    assert service.last_mode == "ollama_local"
+    mock_acompletion.assert_awaited_once()
+    call_kwargs = mock_acompletion.call_args.kwargs
+    assert call_kwargs["model"] == "ollama_chat/llama3.2"
+    assert call_kwargs["api_base"] == "http://localhost:11434"
+    assert "api_key" not in call_kwargs
+
+
+@pytest.mark.asyncio
+async def test_stream_answer_unreachable_ollama_falls_back_to_offline_grounded(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """If local Ollama server is unreachable before streaming, fall back cleanly."""
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    chunk = _make_chunk(
+        0,
+        "[Storage Guide > Fix]\nInspect leases using `acme-storage-cli locks inspect`.",
+    )
+    service = GroundedGeneratorService(
+        model="ollama/llama3.2",
+        ollama_api_base="http://localhost:11434",
+    )
+
+    with patch(
+        "app.services.grounded_generator.litellm.acompletion",
+        new=AsyncMock(side_effect=ConnectionError("Connection refused")),
+    ):
+        tokens = [
+            delta
+            async for delta in service.stream_answer("How do I inspect leases?", [chunk])
+        ]
+
+    full_answer = "".join(tokens)
+    assert service.last_mode == "offline_deterministic"
+    assert f"[{chunk.chunk_id}]" in full_answer
+    assert "acme-storage-cli locks inspect" in full_answer
+
