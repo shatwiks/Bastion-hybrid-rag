@@ -176,7 +176,7 @@ export function TelemetryInspectorDrawer({
   return (
     <aside
       aria-label="6-Step Pipeline Telemetry Inspector"
-      className="flex h-full min-h-[540px] flex-col rounded-2xl border border-slate-800/90 bg-slate-900/70 shadow-xl overflow-hidden"
+      className="flex h-full min-h-[540px] min-w-0 flex-col rounded-2xl border border-slate-800/90 bg-slate-900/70 shadow-xl overflow-hidden"
     >
       {/* Drawer Header */}
       <div className="flex items-center justify-between gap-3 border-b border-slate-800/90 bg-slate-900/95 px-4 py-3">
@@ -214,7 +214,7 @@ export function TelemetryInspectorDrawer({
       </div>
 
       {/* Scrollable Inspector Body */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 min-w-0 overflow-y-auto p-4 space-y-3">
         {!turn ? (
           <div className="flex h-full min-h-[320px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-800 bg-slate-950/40 p-6 text-center">
             <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
@@ -558,7 +558,7 @@ export function TelemetryInspectorDrawer({
             </div>
 
             {/* Candidate Funnel Comparison Table (Top-25 RRF -> Top-5 Cross-Encoder) */}
-            <div className="rounded-xl border border-slate-800 bg-slate-950/75 overflow-hidden">
+            <div className="min-w-0 max-w-full rounded-xl border border-slate-800 bg-slate-950/75 overflow-hidden">
               <button
                 type="button"
                 onClick={() => setFunnelExpanded((prev) => !prev)}
@@ -591,7 +591,7 @@ export function TelemetryInspectorDrawer({
                     </div>
                   ) : (
                     <>
-                      <div className="overflow-x-auto">
+                      <div className="w-full max-w-full overflow-x-auto">
                         <table className="w-full border-collapse text-left text-[11px]">
                           <thead>
                             <tr className="border-b border-slate-800 bg-slate-900/60 font-mono text-[10px] uppercase tracking-wider text-slate-400">

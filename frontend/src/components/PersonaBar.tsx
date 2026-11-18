@@ -114,10 +114,10 @@ export function PersonaBar({
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-800/90 bg-slate-950/95 backdrop-blur-md">
-      <div className="mx-auto flex max-w-[1680px] flex-col gap-2.5 px-4 py-3 lg:flex-row lg:items-center lg:justify-between lg:px-6">
+      <div className="mx-auto flex w-full max-w-[1680px] min-w-0 flex-col gap-2.5 px-4 py-3 lg:flex-row lg:items-center lg:justify-between lg:px-6">
         {/* Left: Brand + Tenant + Persona Selectors */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 pr-2 border-r border-slate-800">
+        <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 pr-2 sm:border-r sm:border-slate-800">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
               <ShieldCheck className="h-4 w-4" />
             </div>
@@ -152,7 +152,7 @@ export function PersonaBar({
 
           {/* Tenant Selector */}
           <div
-            className="inline-flex items-center rounded-lg border border-slate-800 bg-slate-900/90 p-0.5"
+            className="inline-flex max-w-full flex-wrap items-center rounded-lg border border-slate-800 bg-slate-900/90 p-0.5"
             role="group"
             aria-label="Tenant Selector"
           >
@@ -183,7 +183,7 @@ export function PersonaBar({
 
           {/* Role Persona Pills */}
           <div
-            className="inline-flex flex-wrap items-center gap-1 rounded-lg border border-slate-800 bg-slate-900/90 p-0.5"
+            className="inline-flex max-w-full flex-wrap items-center gap-1 rounded-lg border border-slate-800 bg-slate-900/90 p-0.5"
             role="group"
             aria-label="Role Persona Selector"
           >
@@ -215,10 +215,10 @@ export function PersonaBar({
         </div>
 
         {/* Center/Right: Live SecurityContext Badge + Action Buttons */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 lg:justify-end">
+        <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2.5 lg:w-auto lg:justify-end">
           {/* Security Context Display */}
           <div
-            className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/75 px-3 py-1.5 text-xs"
+            className="flex max-w-full min-w-0 flex-wrap items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/75 px-3 py-1.5 text-xs"
             aria-label="Active JWT Security Context"
           >
             <div className="flex items-center gap-1.5 text-slate-400">
@@ -232,7 +232,7 @@ export function PersonaBar({
               </span>
             </div>
 
-            <span className="text-slate-700">|</span>
+            <span className="hidden sm:inline text-slate-700">|</span>
 
             <div className="flex flex-wrap items-center gap-1">
               {(session?.allowed_roles ?? ["public"]).map((role) => (
@@ -245,20 +245,20 @@ export function PersonaBar({
               ))}
             </div>
 
-            <span className="text-slate-700">|</span>
+            <span className="hidden sm:inline text-slate-700">|</span>
 
             <div
-              className="flex items-center gap-1 font-mono text-[11px] text-cyan-300"
+              className="flex min-w-0 max-w-full items-center gap-1 font-mono text-[11px] text-cyan-300"
               title="Canonical SHA-256 RBAC scope_hash partitioning PostgreSQL retrieval and Redis Semantic Cache"
             >
-              <KeyRound className="h-3 w-3 text-cyan-400" />
+              <KeyRound className="h-3 w-3 shrink-0 text-cyan-400" />
               <span className="text-slate-400">scope_hash:</span>
-              <span>{session?.scope_hash ?? "minting..."}</span>
+              <span className="truncate">{session?.scope_hash ?? "minting..."}</span>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex max-w-full flex-wrap items-center gap-2">
             <button
               type="button"
               disabled={!canRerun}

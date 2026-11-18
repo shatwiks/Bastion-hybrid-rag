@@ -293,7 +293,7 @@ export default function EnterpriseRagWorkspacePage() {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100">
+    <div className="flex min-h-screen w-full min-w-0 flex-col overflow-x-clip bg-slate-950 text-slate-100">
       <PersonaBar
         session={session}
         onSessionChange={(nextSession) => setSession(nextSession)}
@@ -335,9 +335,9 @@ export default function EnterpriseRagWorkspacePage() {
       )}
 
       {/* Split-Pane Enterprise Workspace (60% Chat / 40% Collapsible Telemetry Inspector) */}
-      <main className="mx-auto flex w-full max-w-[1680px] flex-1 flex-col gap-4 p-4 lg:flex-row lg:items-stretch lg:px-6 lg:py-4">
+      <main className="mx-auto flex w-full max-w-[1680px] min-w-0 flex-1 flex-col gap-4 p-4 lg:flex-row lg:items-stretch lg:px-6 lg:py-4">
         <div
-          className={`flex min-h-0 flex-col transition-all duration-200 ${
+          className={`flex min-h-0 min-w-0 flex-col transition-all duration-200 ${
             isInspectorOpen ? "w-full lg:w-[60%]" : "w-full"
           }`}
         >
@@ -353,7 +353,7 @@ export default function EnterpriseRagWorkspacePage() {
         </div>
 
         {isInspectorOpen && (
-          <div className="flex min-h-0 w-full flex-col lg:w-[40%]">
+          <div className="flex min-h-0 min-w-0 w-full flex-col lg:w-[40%]">
             <TelemetryInspectorDrawer
               turn={activeTurn}
               session={session}

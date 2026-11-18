@@ -209,11 +209,11 @@ export function AdminIngestionModal({
       onClick={onClose}
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 shadow-2xl"
+        className="flex max-h-[90vh] w-full max-w-[calc(100vw-2rem)] sm:max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 shadow-2xl"
         onClick={(event) => event.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between gap-4 border-b border-slate-800 bg-slate-900/95 px-6 py-4">
+        <div className="flex items-center justify-between gap-4 border-b border-slate-800 bg-slate-900/95 px-4 py-3.5 sm:px-6 sm:py-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <FilePlus2 className="h-5 w-5 text-emerald-400 shrink-0" />
@@ -240,14 +240,14 @@ export function AdminIngestionModal({
             type="button"
             onClick={onClose}
             aria-label="Close Admin Ingestion modal"
-            className="rounded-lg border border-slate-700/80 bg-slate-800/80 p-1.5 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
+            className="rounded-lg border border-slate-700/80 bg-slate-800/80 p-1.5 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer shrink-0"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 min-w-0 overflow-y-auto p-4 sm:p-6 space-y-6">
           {/* Active Public Persona Warning */}
           {isPublicPersona && !isRbacForbidden && (
             <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/40 bg-amber-950/35 px-4 py-3 text-xs text-amber-200">
