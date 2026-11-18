@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 430" width="100%" role="img" aria-label="Animated 6-Step Request Lifecycle of Bastion Hybrid RAG">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399"/>
+    </marker>
+    <marker id="arrowAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24"/>
+    </marker>
+    <style>
+      .h { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 700; fill: #f8fafc; }
+      .t { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 500; fill: #94a3b8; }
+      .m { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 600; }
+      .flow-line { stroke-dasharray: 8 6; animation: dash 1.2s linear infinite; }
+      .flow-fast { stroke-dasharray: 7 5; animation: dash 0.9s linear infinite; }
+      .flow-refuse { stroke-dasharray: 6 6; animation: dash 1.6s linear infinite; }
+      @keyframes dash {
+        to { stroke-dashoffset: -28; }
+      }
+    </style>
+  </defs>
+
+  <!-- Canvas -->
+  <rect width="1200" height="430" rx="16" fill="url(#bg)" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- Header -->
+  <text x="36" y="42" class="h" font-size="18">Live 6-Step Request Lifecycle</text>
+  <text x="295" y="42" class="m" font-size="12" fill="#38bdf8">POST /api/v1/chat/stream  ·  Multiplexed SSE</text>
+
+  <!-- Legend -->
+  <g transform="translate(770, 26)">
+    <circle cx="8" cy="10" r="4.5" fill="#38bdf8"/>
+    <text x="19" y="14" class="t" font-size="11.5">Full Retrieval Path</text>
+    <circle cx="152" cy="10" r="4.5" fill="#34d399"/>
+    <text x="163" y="14" class="t" font-size="11.5">Cache Fast-Path</text>
+    <circle cx="284" cy="10" r="4.5" fill="#fbbf24"/>
+    <text x="295" y="14" class="t" font-size="11.5">Refusal Gate (&lt;0.65)</text>
+  </g>
+
+  <!-- Animated Cache Hit Fast-Path Arc (Step 2 -> Output) -->
+  <path id="cachePath" d="M 300 132 C 300 72, 1085 72, 1085 132" fill="none" stroke="#10b981" stroke-width="2" class="flow-fast" marker-end="url(#arrowGreen)"/>
+  <rect x="572" y="64" width="236" height="24" rx="12" fill="#064e3b" stroke="#10b981" stroke-opacity="0.7"/>
+  <text x="690" y="80" text-anchor="middle" class="m" font-size="11" fill="#6ee7b7">CACHE HIT (sim ≥ 0.90) · ~20–60ms</text>
+  <circle r="5" fill="#34d399" filter="url(#glow)">
+    <animateMotion dur="2.6s" repeatCount="indefinite" path="M 300 132 C 300 72, 1085 72, 1085 132"/>
+  </circle>
+
+  <!-- Main horizontal pipeline connectors -->
+  <line x1="192" y1="196" x2="218" y2="196" stroke="#38bdf8" stroke-width="2" class="flow-line" marker-end="url(#arrowBlue)"/>
+  <line x1="382" y1="196" x2="408" y2="196" stroke="#38bdf8" stroke-width="2" class="flow-line" marker-end="url(#arrowBlue)"/>
+  <line x1="572" y1="196" x2="598" y2="196" stroke="#38bdf8" stroke-width="2" class="flow-line" marker-end="url(#arrowBlue)"/>
+  <line x1="762" y1="196" x2="788" y2="196" stroke="#38bdf8" stroke-width="2" class="flow-line" marker-end="url(#arrowBlue)"/>
+  <line x1="952" y1="196" x2="978" y2="196" stroke="#38bdf8" stroke-width="2" class="flow-line" marker-end="url(#arrowBlue)"/>
+
+  <!-- Animated packet travelling steps 1 -> 6 -->
+  <circle r="5" fill="#38bdf8" filter="url(#glow)">
+    <animateMotion dur="4.4s" repeatCount="indefinite" path="M 110 196 L 1065 196"/>
+  </circle>
+
+  <!-- STEP 1 -->
+  <g transform="translate(28, 134)">
+    <rect width="164" height="124" rx="12" fill="#0b1528" stroke="#10b981" stroke-opacity="0.7" stroke-width="1.4"/>
+    <rect x="12" y="12" width="24" height="22" rx="6" fill="#065f46"/>
+    <text x="24" y="27" text-anchor="middle" class="m" font-size="12" fill="#6ee7b7">1</text>
+    <text x="44" y="27" class="h" font-size="12.5">Auth Guardrail</text>
+    <text x="12" y="54" class="t" font-size="11.2">PyJWT verifies token</text>
+    <text x="12" y="72" class="t" font-size="11.2">Extracts immutable</text>
+    <text x="12" y="92" class="m" font-size="10.5" fill="#6ee7b7">tenant_id +</text>
+    <text x="12" y="108" class="m" font-size="10.5" fill="#6ee7b7">scope_hash</text>
+  </g>
+
+  <!-- STEP 2 -->
+  <g transform="translate(218, 134)">
+    <rect width="164" height="124" rx="12" fill="#0b1528" stroke="#38bdf8" stroke-opacity="0.65" stroke-width="1.4"/>
+    <rect x="12" y="12" width="24" height="22" rx="6" fill="#0c4a6e"/>
+    <text x="24" y="27" text-anchor="middle" class="m" font-size="12" fill="#7dd3fc">2</text>
+    <text x="44" y="27" class="h" font-size="12.5">Semantic Cache</text>
+    <text x="12" y="54" class="t" font-size="11.2">Redis scoped by:</text>
+    <text x="12" y="74" class="m" font-size="10.2" fill="#7dd3fc">tenant:scope:</text>
+    <text x="12" y="90" class="m" font-size="10.2" fill="#7dd3fc">entity_fp</text>
+    <text x="12" y="110" class="t" font-size="10.5">Zero cache poisoning</text>
+  </g>
+
+  <!-- STEP 3 -->
+  <g transform="translate(408, 134)">
+    <rect width="164" height="124" rx="12" fill="#0b1528" stroke="#38bdf8" stroke-opacity="0.65" stroke-width="1.4"/>
+    <rect x="12" y="12" width="24" height="22" rx="6" fill="#0c4a6e"/>
+    <text x="24" y="27" text-anchor="middle" class="m" font-size="12" fill="#7dd3fc">3</text>
+    <text x="44" y="27" class="h" font-size="12.5">Hybrid RRF</text>
+    <text x="12" y="54" class="t" font-size="11.2">SQL WHERE RBAC</text>
+    <text x="12" y="72" class="t" font-size="11.2">pgvector + Dual FTS</text>
+    <text x="12" y="92" class="m" font-size="10.5" fill="#7dd3fc">RRF (k=60)</text>
+    <text x="12" y="108" class="t" font-size="10.5">Top 25 candidates</text>
+  </g>
+
+  <!-- STEP 4 -->
+  <g transform="translate(598, 134)">
+    <rect width="164" height="124" rx="12" fill="#171429" stroke="#f59e0b" stroke-opacity="0.8" stroke-width="1.5"/>
+    <rect x="12" y="12" width="24" height="22" rx="6" fill="#78350f"/>
+    <text x="24" y="27" text-anchor="middle" class="m" font-size="12" fill="#fde68a">4</text>
+    <text x="44" y="27" class="h" font-size="12.5">Refusal Gate</text>
+    <text x="12" y="54" class="t" font-size="11.2">Local Cross-Encoder</text>
+    <text x="12" y="72" class="t" font-size="11.2">Sigmoid score [0..1]</text>
+    <text x="12" y="92" class="m" font-size="10.8" fill="#fbbf24">score ≥ 0.65 ?</text>
+    <text x="12" y="108" class="t" font-size="10.5">Top ≤ 5 verified chunks</text>
+  </g>
+
+  <!-- STEP 5 -->
+  <g transform="translate(788, 134)">
+    <rect width="164" height="124" rx="12" fill="#0b1528" stroke="#818cf8" stroke-opacity="0.7" stroke-width="1.4"/>
+    <rect x="12" y="12" width="24" height="22" rx="6" fill="#312e81"/>
+    <text x="24" y="27" text-anchor="middle" class="m" font-size="12" fill="#c7d2fe">5</text>
+    <text x="44" y="27" class="h" font-size="12.5">Grounded LLM</text>
+    <text x="12" y="54" class="t" font-size="11.2">Ollama / Cloud / Offline</text>
+    <text x="12" y="72" class="t" font-size="11.2">Strict &lt;context&gt; prompt</text>
+    <text x="12" y="92" class="m" font-size="10.5" fill="#a5b4fc">[chunk_id] badges</text>
+    <text x="12" y="108" class="t" font-size="10.5">Token SSE streaming</text>
+  </g>
+
+  <!-- STEP 6 -->
+  <g transform="translate(978, 134)">
+    <rect width="194" height="124" rx="12" fill="#0b1528" stroke="#10b981" stroke-opacity="0.7" stroke-width="1.4"/>
+    <rect x="12" y="12" width="24" height="22" rx="6" fill="#065f46"/>
+    <text x="24" y="27" text-anchor="middle" class="m" font-size="12" fill="#6ee7b7">6</text>
+    <text x="44" y="27" class="h" font-size="12.5">Trace &amp; Cache</text>
+    <text x="12" y="54" class="t" font-size="11.2">Async Langfuse span</text>
+    <text x="12" y="72" class="t" font-size="11.2">Redis store (≥ 0.65)</text>
+    <text x="12" y="92" class="m" font-size="10.5" fill="#6ee7b7">SSE: citations + done</text>
+    <text x="12" y="108" class="t" font-size="10.5">Live UI Telemetry Drawer</text>
+  </g>
+
+  <!-- Short-Circuit Refusal Branch (Step 4 -> Bottom Refusal Card) -->
+  <path d="M 680 258 L 680 318" fill="none" stroke="#fbbf24" stroke-width="2" class="flow-refuse" marker-end="url(#arrowAmber)"/>
+  <circle r="4.5" fill="#fbbf24" filter="url(#glow)">
+    <animateMotion dur="2.1s" repeatCount="indefinite" path="M 680 258 L 680 318"/>
+  </circle>
+
+  <g transform="translate(408, 322)">
+    <rect width="544" height="76" rx="12" fill="#23121b" stroke="#f43f5e" stroke-opacity="0.7" stroke-width="1.4"/>
+    <rect x="16" y="14" width="166" height="22" rx="6" fill="#881337"/>
+    <text x="99" y="29" text-anchor="middle" class="m" font-size="10.8" fill="#fda4af">DETERMINISTIC REFUSAL</text>
+    <text x="196" y="29" class="h" font-size="13" fill="#fecdd3">Score &lt; 0.65 or Zero RBAC Chunks</text>
+    <text x="16" y="56" class="t" font-size="12" fill="#cbd5e1">Short-circuits before Step 5 · <tspan class="m" fill="#fbbf24">LLM Called: FALSE (0 Tokens Spent)</tspan> · Hallucination Prevented</text>
+  </g>
+
+  <!-- Plain English Footer Hint -->
+  <text x="36" y="366" class="t" font-size="12">Security happens at</text>
+  <text x="36" y="384" class="m" font-size="12" fill="#34d399">Step 1 + Step 2 + Step 3</text>
+  <text x="984" y="366" class="t" font-size="12">Every step streams live to</text>
+  <text x="984" y="384" class="m" font-size="12" fill="#a5b4fc">TelemetryInspectorDrawer</text>
+</svg>

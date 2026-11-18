@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 320" width="100%" role="img" aria-label="Measured Benchmark Comparison: Naive Dense RAG vs Bastion Hybrid RAG">
+  <defs>
+    <linearGradient id="bgChart" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="barGood" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <linearGradient id="barWarn" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="100%" stop-color="#fb7185"/>
+    </linearGradient>
+    <style>
+      .h { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 700; fill: #f8fafc; }
+      .t { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 500; fill: #94a3b8; }
+      .m { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 600; }
+    </style>
+  </defs>
+
+  <rect width="1000" height="320" rx="16" fill="url(#bgChart)" stroke="#1e293b" stroke-width="1.5"/>
+
+  <text x="32" y="38" class="h" font-size="17">Verified Benchmark: Naive Dense RAG vs. Bastion Hybrid RAG</text>
+  <text x="32" y="58" class="t" font-size="12">Source: evals/reports/latest_benchmark.json · 28 retrieval probes (17 golden + 11 jargon) · 14 adversarial traps</text>
+
+  <!-- Legend -->
+  <g transform="translate(650, 26)">
+    <rect x="0" y="2" width="12" height="12" rx="3" fill="#475569"/>
+    <text x="18" y="12" class="t" font-size="11.5">Naive Dense Baseline</text>
+    <rect x="155" y="2" width="12" height="12" rx="3" fill="url(#barGood)"/>
+    <text x="173" y="12" class="t" font-size="11.5" fill="#e2e8f0">Bastion Hybrid RAG</text>
+  </g>
+
+  <!-- Row 1: Retrieval Precision -->
+  <g transform="translate(32, 86)">
+    <text x="0" y="16" class="h" font-size="13.5">Retrieval Precision</text>
+    <text x="0" y="34" class="t" font-size="11">Gate: ≥ 85.0%</text>
+
+    <!-- Track -->
+    <rect x="210" y="4" width="540" height="14" rx="7" fill="#1e293b"/>
+    <rect x="210" y="24" width="540" height="16" rx="8" fill="#1e293b"/>
+
+    <!-- Baseline 81.43% -> 440px -->
+    <rect x="210" y="4" width="440" height="14" rx="7" fill="#475569">
+      <animate attributeName="width" from="0" to="440" dur="1s" fill="freeze"/>
+    </rect>
+    <text x="766" y="15" class="m" font-size="12" fill="#94a3b8">81.43%</text>
+
+    <!-- Bastion 100.0% -> 540px -->
+    <rect x="210" y="24" width="540" height="16" rx="8" fill="url(#barGood)">
+      <animate attributeName="width" from="0" to="540" dur="1.2s" fill="freeze"/>
+    </rect>
+    <text x="766" y="37" class="m" font-size="13" fill="#34d399">100.0%  ✓ PASS</text>
+  </g>
+
+  <!-- Row 2: Mean Reciprocal Rank (MRR) -->
+  <g transform="translate(32, 152)">
+    <text x="0" y="16" class="h" font-size="13.5">Mean Reciprocal Rank</text>
+    <text x="0" y="34" class="t" font-size="11">Gate: ≥ +26% lift</text>
+
+    <rect x="210" y="4" width="540" height="14" rx="7" fill="#1e293b"/>
+    <rect x="210" y="24" width="540" height="16" rx="8" fill="#1e293b"/>
+
+    <!-- Baseline 0.7542 -> 407px -->
+    <rect x="210" y="4" width="407" height="14" rx="7" fill="#475569">
+      <animate attributeName="width" from="0" to="407" dur="1s" fill="freeze"/>
+    </rect>
+    <text x="766" y="15" class="m" font-size="12" fill="#94a3b8">0.7542</text>
+
+    <!-- Bastion 1.0000 -> 540px -->
+    <rect x="210" y="24" width="540" height="16" rx="8" fill="url(#barGood)">
+      <animate attributeName="width" from="0" to="540" dur="1.3s" fill="freeze"/>
+    </rect>
+    <text x="766" y="37" class="m" font-size="13" fill="#38bdf8">1.0000 (+32.59%)</text>
+  </g>
+
+  <!-- Row 3: Hallucination / Ungrounded Trap Blocking -->
+  <g transform="translate(32, 218)">
+    <text x="0" y="16" class="h" font-size="13.5">Trap Refusal Accuracy</text>
+    <text x="0" y="34" class="t" font-size="11">Gate: ≥ 82% reduction</text>
+
+    <rect x="210" y="4" width="540" height="14" rx="7" fill="#1e293b"/>
+    <rect x="210" y="24" width="540" height="16" rx="8" fill="#1e293b"/>
+
+    <!-- Baseline: 0% blocked (100% ungrounded) -->
+    <rect x="210" y="4" width="12" height="14" rx="7" fill="url(#barWarn)"/>
+    <text x="766" y="15" class="m" font-size="12" fill="#fda4af">0.0% blocked (100% halluc.)</text>
+
+    <!-- Bastion: 100% blocked -->
+    <rect x="210" y="24" width="540" height="16" rx="8" fill="url(#barGood)">
+      <animate attributeName="width" from="0" to="540" dur="1.4s" fill="freeze"/>
+    </rect>
+    <text x="766" y="37" class="m" font-size="13" fill="#34d399">100.0% blocked ✓</text>
+  </g>
+
+  <!-- Footer RBAC Callout -->
+  <rect x="32" y="276" width="936" height="28" rx="8" fill="#064e3b" fill-opacity="0.38" stroke="#10b981" stroke-opacity="0.45"/>
+  <text x="500" y="294" text-anchor="middle" class="m" font-size="12" fill="#6ee7b7">Cross-Tenant &amp; Cross-Role RBAC Leakage Rate: 0.0000 (0 / 14 adversarial boundary probes)</text>
+</svg>
