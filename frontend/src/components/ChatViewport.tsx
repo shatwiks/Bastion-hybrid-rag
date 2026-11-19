@@ -190,7 +190,7 @@ export function ChatViewport({
           </span>
           <span className="font-mono text-[11.5px] text-[var(--ink-secondary)]">
             <strong className="font-medium text-[var(--ink)]">
-              {session?.tenant_id ?? "acme_corp"}
+              hybrid-kb
             </strong>{" "}
             · {session?.persona ?? "support_tier_1"}
           </span>
@@ -211,7 +211,7 @@ export function ChatViewport({
           <div className="mx-auto flex h-full max-w-[68ch] flex-col justify-center py-6">
             <div className="mb-6">
               <h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)]">
-                Ask your authorized knowledge base
+                Ask your indexed knowledge base
               </h1>
               <p className="mt-1.5 text-sm leading-relaxed text-[var(--ink-secondary)]">
                 Every query runs pre-retrieval SQL RBAC, hybrid dense + BM25 search, and a{" "}
@@ -220,11 +220,11 @@ export function ChatViewport({
                 {session && (
                   <>
                     {" "}
-                    Active scope:{" "}
+                    Active role scope:{" "}
                     <span className="font-mono text-[12.5px] font-medium text-[var(--ink)]">
-                      {session.tenant_id}
-                    </span>{" "}
-                    ({session.allowed_roles.join(", ")}).
+                      {session.allowed_roles.join(", ")}
+                    </span>
+                    .
                   </>
                 )}
               </p>
@@ -233,7 +233,7 @@ export function ChatViewport({
             {/* Clean Hairline Scenario List (collapses once first turn begins) */}
             <div className="border-t border-[var(--rule)]">
               <div className="flex items-center justify-between py-2.5 text-xs font-medium text-[var(--ink-muted)]">
-                <span>Guided Enterprise Scenarios</span>
+                <span>Guided Hybrid RAG Probes</span>
                 <span className="hidden sm:inline">Click any row to execute live</span>
               </div>
               <div className="divide-y divide-[var(--rule)] border-t border-b border-[var(--rule)]">
@@ -291,7 +291,7 @@ export function ChatViewport({
                     <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[var(--ink-muted)]">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-mono font-medium text-[var(--ink-secondary)]">
-                          {turn.tenant_id}
+                          hybrid-kb
                         </span>
                         <span>/</span>
                         <span className="font-mono text-[var(--ink-secondary)]">
@@ -567,7 +567,7 @@ export function ChatViewport({
               disabled={!session || isStreaming}
               placeholder={
                 session
-                  ? `Ask a question as ${session.tenant_id} (${session.persona})…`
+                  ? `Ask a question across your indexed documents (role: ${session.persona})…`
                   : "Initializing security session…"
               }
               aria-label="Ask enterprise RAG question"

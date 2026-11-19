@@ -17,11 +17,6 @@ import type {
   TenantId,
 } from "@/types/rag";
 
-const TENANT_OPTIONS: Array<{ id: TenantId; label: string }> = [
-  { id: "acme_corp", label: "Acme Corp" },
-  { id: "globex_corp", label: "Globex Corp" },
-];
-
 const PERSONA_OPTIONS: Array<{
   id: PersonaType;
   label: string;
@@ -158,59 +153,37 @@ export function PersonaBar({
             </div>
           </div>
 
-          {/* Tenant Segmented Control */}
-          <div
-            role="group"
-            aria-label="Select tenant"
-            className="inline-flex max-w-full items-center rounded-[4px] border border-[var(--shell-rule)] bg-[#1b1a15] p-0.5"
-          >
-            {TENANT_OPTIONS.map((tenant) => {
-              const isSelected = activeTenant === tenant.id;
-              return (
-                <button
-                  key={tenant.id}
-                  type="button"
-                  disabled={isMinting || isStreaming}
-                  aria-pressed={isSelected}
-                  onClick={() => handleSwitch(tenant.id, activePersona)}
-                  className={`rounded-[3px] px-2.5 py-1 text-xs font-medium transition-colors duration-150 cursor-pointer disabled:opacity-50 ${
-                    isSelected
-                      ? "bg-[var(--ground)] text-[var(--ink)]"
-                      : "text-[var(--shell-muted)] hover:text-[var(--shell-ink)]"
-                  }`}
-                >
-                  {tenant.label}
-                </button>
-              );
-            })}
-          </div>
-
           {/* Role Persona Segmented Control */}
-          <div
-            role="group"
-            aria-label="Select RBAC role persona"
-            className="inline-flex max-w-full flex-wrap items-center rounded-[4px] border border-[var(--shell-rule)] bg-[#1b1a15] p-0.5"
-          >
-            {PERSONA_OPTIONS.map((persona) => {
-              const isSelected = activePersona === persona.id;
-              return (
-                <button
-                  key={persona.id}
-                  type="button"
-                  disabled={isMinting || isStreaming}
-                  aria-pressed={isSelected}
-                  title={`Role scope: ${persona.tierDescription}`}
-                  onClick={() => handleSwitch(activeTenant, persona.id)}
-                  className={`rounded-[3px] px-2.5 py-1 text-xs font-medium transition-colors duration-150 cursor-pointer disabled:opacity-50 ${
-                    isSelected
-                      ? "bg-[var(--copper)] text-white"
-                      : "text-[var(--shell-muted)] hover:text-[var(--shell-ink)]"
-                  }`}
-                >
-                  {persona.label}
-                </button>
-              );
-            })}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="hidden font-mono text-[11px] text-[var(--shell-muted)] sm:inline">
+              Access Role:
+            </span>
+            <div
+              role="group"
+              aria-label="Select RBAC role persona"
+              className="inline-flex max-w-full flex-wrap items-center rounded-[4px] border border-[var(--shell-rule)] bg-[#1b1a15] p-0.5"
+            >
+              {PERSONA_OPTIONS.map((persona) => {
+                const isSelected = activePersona === persona.id;
+                return (
+                  <button
+                    key={persona.id}
+                    type="button"
+                    disabled={isMinting || isStreaming}
+                    aria-pressed={isSelected}
+                    title={`Role scope: ${persona.tierDescription}`}
+                    onClick={() => handleSwitch(activeTenant, persona.id)}
+                    className={`rounded-[3px] px-2.5 py-1 text-xs font-medium transition-colors duration-150 cursor-pointer disabled:opacity-50 ${
+                      isSelected
+                        ? "bg-[var(--copper)] text-white"
+                        : "text-[var(--shell-muted)] hover:text-[var(--shell-ink)]"
+                    }`}
+                  >
+                    {persona.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -220,12 +193,11 @@ export function PersonaBar({
           {session && (
             <div
               className="hidden items-center gap-2 rounded-[4px] border border-[var(--shell-rule)] bg-[#1b1a15] px-2.5 py-1 text-[11px] xl:flex"
-              title={`Tenant: ${session.tenant_id} · Allowed roles: ${session.allowed_roles.join(", ")} · Scope hash: ${session.scope_hash}`}
+              title={`Allowed roles: ${session.allowed_roles.join(", ")} · Scope hash: ${session.scope_hash}`}
             >
               <span className="font-mono text-[var(--shell-muted)]">
-                {session.tenant_id}
+                roles:
               </span>
-              <span className="text-[var(--shell-rule)]">/</span>
               <span className="font-mono text-[var(--shell-ink)]">
                 {session.allowed_roles.join(", ")}
               </span>
@@ -252,7 +224,7 @@ export function PersonaBar({
             onClick={() => onRerunLastQuery(session ?? undefined)}
             title={
               lastQuery
-                ? `Re-run "${lastQuery}" under ${activeTenant} / ${activePersona}`
+                ? `Re-run "${lastQuery}" under role ${activePersona}`
                 : "Ask a question first to re-run under another role"
             }
             className="inline-flex h-8 items-center gap-1.5 rounded-[4px] border border-[var(--shell-rule)] bg-[var(--shell-surface)] px-2.5 text-xs font-medium text-[var(--shell-ink)] transition-colors duration-150 hover:bg-[var(--shell-surface-active)] active:translate-y-px cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
@@ -271,7 +243,7 @@ export function PersonaBar({
             className="inline-flex h-8 items-center gap-1.5 rounded-[4px] border border-[var(--shell-rule)] bg-[var(--shell-surface)] px-2.5 text-xs font-medium text-[var(--shell-ink)] transition-colors duration-150 hover:bg-[var(--shell-surface-active)] active:translate-y-px cursor-pointer"
           >
             <Upload className="h-3.5 w-3.5" />
-            <span>Admin Ingestion</span>
+            <span>Ingest Docs</span>
           </button>
 
           {/* Telemetry Inspector Toggle */}
@@ -306,7 +278,7 @@ export function PersonaBar({
       {session && (
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--shell-rule)]/70 bg-[#1b1a15] px-4 py-1 text-[11px] text-[var(--shell-muted)] xl:hidden">
           <span className="truncate font-mono">
-            {session.tenant_id} · {session.allowed_roles.join(", ")}
+            roles: {session.allowed_roles.join(", ")}
           </span>
           <span className="font-mono tabular-nums text-[#8cc9a8]">
             scope:{session.scope_hash}

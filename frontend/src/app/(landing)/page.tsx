@@ -146,14 +146,14 @@ export default function BastionLandingPage() {
                   <span>100% precision</span>
                   <span className="muted">28 benchmark probes</span>
                 </a>
-                <h1 id="hero-h" aria-label="Hybrid RAG for multi-tenant teams">
+                <h1 id="hero-h" aria-label="Hybrid RAG for engineering teams">
                   <span className="ly-mark" aria-hidden="true" /> Hybrid RAG for
-                  multi-tenant teams
+                  engineering teams
                 </h1>
                 <p className="hero__lead">
-                  Bastion filters tenant roles inside PostgreSQL before ranking,
-                  fuses pgvector with BM25, and refuses low-confidence answers
-                  below 0.65.
+                  Bastion filters document roles inside PostgreSQL before
+                  ranking, fuses pgvector with BM25, and refuses low-confidence
+                  answers below 0.65.
                 </p>
                 <div className="btn-row">
                   <a className="btn btn--primary" href="/workspace">
@@ -175,7 +175,7 @@ export default function BastionLandingPage() {
                 data-fx-seed="7"
                 data-fx-palette='{"bg":"#d9ccb7","surface":"#e9e0d2","ink":"#2a2622","accent":"#a8794a"}'
                 role="img"
-                aria-label="Bastion answering an ERR_409_CONFLICT lock contention query with verified inline citations under acme_corp support_tier_1"
+                aria-label="Bastion answering an ERR_409_CONFLICT lock contention query with verified inline citations under support_tier_1"
               >
                 <div className="ly-piece b-win" aria-hidden="true">
                   <div className="b-win__bar">
@@ -185,7 +185,7 @@ export default function BastionLandingPage() {
                       <i />
                     </span>
                     <span>
-                      <b>acme_corp</b> · support_tier_1
+                      <b>hybrid-kb</b> · support_tier_1
                     </span>
                     <span className="sp" />
                     <span>pgvector · Redis · 0.65 Gate</span>
@@ -197,7 +197,7 @@ export default function BastionLandingPage() {
                         <i style={{ background: "#c8d9f8" }}>T1</i>
                         <b>ERR_409_CONFLICT</b>
                         <time>0.996</time>
-                        <span>acme-storage-cli locks release</span>
+                        <span>storage-cli locks release</span>
                       </div>
                       <div className="t">
                         <i style={{ background: "#b9dfc8" }}>T1</i>
@@ -221,9 +221,9 @@ export default function BastionLandingPage() {
                           SQL RBAC + Hybrid RRF (25 chunks) · Cross-Encoder 0.9964
                         </div>
                         <div className="b-msg b-msg--bot" data-step="">
-                          Inspect the lock owner with acme-storage-cli locks
-                          inspect, release stale leases older than 30 seconds,
-                          and resume sync with backoff.
+                          Inspect the lock owner with storage-cli locks inspect,
+                          release stale leases older than 30 seconds, and resume
+                          sync with backoff.
                           <small>4 verified sources</small>
                         </div>
                         <div className="b-acts" data-step="">
@@ -305,12 +305,12 @@ export default function BastionLandingPage() {
                         Refused<em>2</em>
                       </span>
                       <span className="ui-win__nav">Ingest</span>
-                      <span className="ui-win__label">Tenants</span>
+                      <span className="ui-win__label">Indexes</span>
                       <span className="ui-win__nav">
-                        <span className="ui-win__hash">#</span>acme_corp
+                        <span className="ui-win__hash">#</span>runbooks
                       </span>
                       <span className="ui-win__nav">
-                        <span className="ui-win__hash">#</span>globex_corp
+                        <span className="ui-win__hash">#</span>architecture
                       </span>
                     </nav>
                     <div className="ui-win__main">
@@ -323,9 +323,9 @@ export default function BastionLandingPage() {
                       <ul className="ui-win__rows">
                         <li className="ui-win__row" data-row="">
                           <span className="ui-avatar" data-tone="1">
-                            AC
+                            T1
                           </span>
-                          <span className="ui-win__who">acme / tier_1</span>
+                          <span className="ui-win__who">role / tier_1</span>
                           <span className="ui-win__sub">
                             Resolve ERR_409_CONFLICT lock
                           </span>
@@ -336,9 +336,9 @@ export default function BastionLandingPage() {
                         </li>
                         <li className="ui-win__row" data-row="">
                           <span className="ui-avatar" data-tone="2">
-                            AC
+                            PB
                           </span>
-                          <span className="ui-win__who">acme / public</span>
+                          <span className="ui-win__who">role / public</span>
                           <span className="ui-win__sub">
                             Q3 M&amp;A expansion targets
                           </span>
@@ -349,9 +349,9 @@ export default function BastionLandingPage() {
                         </li>
                         <li className="ui-win__row" data-row="">
                           <span className="ui-avatar" data-tone="3">
-                            AC
+                            EX
                           </span>
-                          <span className="ui-win__who">acme / exec</span>
+                          <span className="ui-win__who">role / exec</span>
                           <span className="ui-win__sub">
                             Q3 M&amp;A expansion targets
                           </span>
@@ -362,9 +362,9 @@ export default function BastionLandingPage() {
                         </li>
                         <li className="ui-win__row" data-row="">
                           <span className="ui-avatar" data-tone="4">
-                            GX
+                            T1
                           </span>
-                          <span className="ui-win__who">globex / tier_1</span>
+                          <span className="ui-win__who">role / tier_1</span>
                           <span className="ui-win__sub">
                             ERR_401_SEC_REVOKED mTLS fix
                           </span>
@@ -375,9 +375,9 @@ export default function BastionLandingPage() {
                         </li>
                         <li className="ui-win__row" data-row="">
                           <span className="ui-avatar" data-tone="5">
-                            AC
+                            T1
                           </span>
-                          <span className="ui-win__who">acme / tier_1</span>
+                          <span className="ui-win__who">role / tier_1</span>
                           <span className="ui-win__sub">
                             SKU-9921-A dual PSU draw
                           </span>
@@ -388,9 +388,9 @@ export default function BastionLandingPage() {
                         </li>
                         <li className="ui-win__row" data-row="">
                           <span className="ui-avatar" data-tone="2">
-                            GX
+                            EX
                           </span>
-                          <span className="ui-win__who">globex / exec</span>
+                          <span className="ui-win__who">role / exec</span>
                           <span className="ui-win__sub">
                             TARGET-AEGIS-7 board ceiling
                           </span>
@@ -401,9 +401,9 @@ export default function BastionLandingPage() {
                         </li>
                         <li className="ui-win__row" data-row="">
                           <span className="ui-avatar" data-tone="1">
-                            AC
+                            PB
                           </span>
-                          <span className="ui-win__who">acme / public</span>
+                          <span className="ui-win__who">role / public</span>
                           <span className="ui-win__sub">
                             Quantum wormhole flux capacitor
                           </span>
@@ -414,9 +414,9 @@ export default function BastionLandingPage() {
                         </li>
                         <li className="ui-win__row" data-row="">
                           <span className="ui-avatar" data-tone="4">
-                            GX
+                            T1
                           </span>
-                          <span className="ui-win__who">globex / tier_1</span>
+                          <span className="ui-win__who">role / tier_1</span>
                           <span className="ui-win__sub">
                             SKU-GLX-500 inspected TLS spec
                           </span>
@@ -427,9 +427,9 @@ export default function BastionLandingPage() {
                         </li>
                         <li className="ui-win__row" data-row="">
                           <span className="ui-avatar" data-tone="3">
-                            AC
+                            PB
                           </span>
-                          <span className="ui-win__who">acme / public</span>
+                          <span className="ui-win__who">role / public</span>
                           <span className="ui-win__sub">
                             Mission-Critical uptime SLA
                           </span>
@@ -449,7 +449,7 @@ export default function BastionLandingPage() {
                   <div className="ui-pipe__head">
                     <span className="ui-pipe__repo">bastion/rag</span>
                     <i className="ui-pipe__slash">/</i>
-                    <code className="ui-pipe__ref">acme_corp</code>
+                    <code className="ui-pipe__ref">hybrid-kb</code>
                     <span className="ui-pipe__run">#f51251</span>
                     <span className="ui-spacer" />
                     <span className="ui-pipe__total">
@@ -598,7 +598,7 @@ export default function BastionLandingPage() {
                       <b>$</b>verify HS256 JWT -&gt; scope_hash=f5125156de6f5c83
                     </span>
                     <span className="ui-pipe__line" data-step="cache">
-                      <b>$</b>SCAN llm_cache:acme_corp:f5125156:err_409_conflict
+                      <b>$</b>SCAN llm_cache:hybrid_kb:f5125156:err_409_conflict
                     </span>
                     <span className="ui-pipe__line is-on" data-step="hybrid">
                       <b>$</b>SET LOCAL hnsw.iterative_scan = &apos;relaxed_order&apos;
@@ -669,7 +669,7 @@ export default function BastionLandingPage() {
                           <div className="ui-head">
                             <span className="ui-agent" aria-hidden="true" />
                             <div className="ui-title">
-                              acme_corp · public
+                              hybrid-kb · public
                             </div>
                             <span className="ui-chat__online">RBAC</span>
                             <span className="ui-spacer" />
@@ -1011,10 +1011,10 @@ export default function BastionLandingPage() {
               <h2 id="walkthrough-h">Bastion live workspace walkthrough</h2>
               <ol className="mo-pc__steps">
                 <li className="mo-pc__step">
-                  <h3>1. Switch tenant and role JWT</h3>
+                  <h3>1. Switch RBAC role JWT</h3>
                   <p>
-                    Pick Acme Corp or Globex Corp across Public, Support Tier 1
-                    and Executive to mint a signed scope_hash.
+                    Pick Public, Support Tier 1 or Executive in the top command
+                    bar to mint a signed role scope_hash in real time.
                   </p>
                   <figure className="mo-pc__visual">
                     <img
@@ -1090,7 +1090,7 @@ export default function BastionLandingPage() {
                   <span className="rows__value">0.0%</span>
                 </li>
                 <li>
-                  <span className="rows__name">Cross-tenant RBAC leaks</span>
+                  <span className="rows__name">Role boundary RBAC leaks</span>
                   <span className="rows__value">0.0000</span>
                 </li>
               </ul>

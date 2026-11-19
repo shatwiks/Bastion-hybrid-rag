@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Bastion: Multi-tenant Hybrid RAG engine for engineering teams",
+  title: "Bastion: Hybrid RAG engine for engineering teams",
   description:
     "Pre-retrieval SQL RBAC inside PostgreSQL, pgvector and BM25 fusion, Cross-Encoder refusal gating below 0.65, and live pipeline telemetry.",
   openGraph: {
     type: "website",
-    title: "Bastion: Multi-tenant Hybrid RAG engine for engineering teams",
+    title: "Bastion: Hybrid RAG engine for engineering teams",
     description:
       "Pre-retrieval SQL RBAC inside PostgreSQL, pgvector and BM25 fusion, Cross-Encoder refusal gating below 0.65, and live pipeline telemetry.",
     images: ["/share.png"],

@@ -217,9 +217,9 @@ export function AdminIngestionModal({
               {session && (
                 <>
                   {" "}
-                  Session:{" "}
+                  Active role:{" "}
                   <span className="font-mono font-medium text-[var(--ink)]">
-                    {session.tenant_id} / {session.persona}
+                    {session.persona}
                   </span>
                 </>
               )}
@@ -332,13 +332,13 @@ export function AdminIngestionModal({
                     className="mb-1 flex items-center gap-1 text-xs font-semibold text-[var(--ink-secondary)]"
                   >
                     <Lock className="h-3 w-3 text-[var(--ink-muted)]" />
-                    Tenant Scope
+                    Index Namespace
                   </label>
                   <input
                     id="ingest-tenant-id"
                     type="text"
                     readOnly
-                    value={session?.tenant_id ?? ""}
+                    value="hybrid-kb"
                     className="w-full rounded border border-[var(--rule)] bg-[var(--ground)] px-3 py-2 font-mono text-xs text-[var(--ink-secondary)] focus:outline-none"
                   />
                 </div>
@@ -522,7 +522,7 @@ export function AdminIngestionModal({
 
                       <div className="mt-1.5 flex flex-wrap items-center justify-between gap-1.5 text-[11px]">
                         <span className="font-mono text-[var(--ink-muted)]">
-                          {doc.tenant_id}
+                          hybrid-kb
                         </span>
                         {metaRoles.length > 0 && (
                           <div className="flex flex-wrap gap-1">

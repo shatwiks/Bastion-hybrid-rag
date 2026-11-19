@@ -225,7 +225,7 @@ export function TelemetryInspectorDrawer({
             <span className="font-semibold text-[var(--ink)]">bastion/rag</span>
             <span className="text-[var(--ink-muted)]">/</span>
             <code className="rounded-[3px] border border-[var(--rule)] bg-[var(--paper)] px-1.5 py-0.5 font-mono text-[11px] font-medium text-[var(--ink)]">
-              {turn?.tenant_id ?? session?.tenant_id ?? "acme_corp"}
+              hybrid-kb
             </code>
             <span className="hidden font-mono text-[11px] text-[var(--ink-muted)] sm:inline">
               #{(turn?.scope_hash ?? session?.scope_hash ?? "pending").slice(0, 6)}
@@ -330,9 +330,9 @@ export function TelemetryInspectorDrawer({
                 {stage.step === 1 && (step1 || session) && (
                   <div className="mt-2 ml-7.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-[var(--ink-secondary)]">
                     <span>
-                      tenant:{" "}
+                      index:{" "}
                       <strong className="font-medium text-[var(--ink)]">
-                        {String(step1?.details.tenant_id ?? session?.tenant_id ?? "—")}
+                        hybrid-kb
                       </strong>
                     </span>
                     <span>
@@ -581,7 +581,11 @@ export function TelemetryInspectorDrawer({
             <b className="mr-1.5 text-[#6b93f2]">$</b>
             verify HS256 JWT -&gt;{" "}
             <span className="text-[#eceef0]">
-              {String(step1?.details.tenant_id ?? session?.tenant_id ?? "acme_corp")}
+              {(
+                (step1?.details.allowed_roles as string[] | undefined) ??
+                session?.allowed_roles ??
+                ["support_tier_1"]
+              ).join(",")}
             </span>{" "}
             scope_hash=
             {String(step1?.details.scope_hash ?? session?.scope_hash ?? "pending").slice(
@@ -592,7 +596,7 @@ export function TelemetryInspectorDrawer({
           {step2 && (
             <div className="truncate">
               <b className="mr-1.5 text-[#6b93f2]">$</b>
-              SCAN llm_cache:{turn?.tenant_id}:
+              SCAN llm_cache:hybrid-kb:
               {(turn?.scope_hash ?? "").slice(0, 8)} -&gt;{" "}
               <span className={cacheHit ? "text-[#8cc9a8]" : "text-[#eceef0]"}>
                 {cacheHit ? "CACHE_HIT" : cacheBypassed ? "BYPASSED" : "CACHE_MISS"}
@@ -602,7 +606,7 @@ export function TelemetryInspectorDrawer({
           {step3 && step3.status !== "skipped" && (
             <div className="truncate">
               <b className="mr-1.5 text-[#6b93f2]">$</b>
-              WHERE tenant_id AND allowed_roles -&gt;{" "}
+              WHERE allowed_roles &amp;&amp; :roles -&gt;{" "}
               <span className="text-[#eceef0]">
                 {Number(step3.details.candidate_count ?? funnelRows.length)} RRF
                 candidates

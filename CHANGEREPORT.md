@@ -1,5 +1,22 @@
 # Change Report
 
+## 2026-11-19 18:10 IST — Make the UI generic (remove Acme Corp / Globex Corp tenant switcher)
+
+### Objective
+Remove the demo-specific "Acme Corp / Globex Corp" tenant branding so the site reads as a generic Hybrid RAG product.
+
+### Files Modified
+- `frontend/src/components/PersonaBar.tsx` — Removed the tenant switcher; kept the "Access Role" switcher; renamed "Admin Ingestion" to "Ingest Docs".
+- `frontend/src/components/ChatViewport.tsx`, `TelemetryInspectorDrawer.tsx`, `AdminIngestionModal.tsx` — Replaced tenant labels with a generic `hybrid-kb` index name; role-based wording.
+- `frontend/src/app/(landing)/page.tsx`, `layout.tsx` — Hero now "Hybrid RAG for engineering teams"; removed Acme/Globex rows and "multi-tenant" wording.
+- Refreshed `docs/assets/ui-desktop.png`, `ui-mobile.png`, `frontend/public/assets/chapter-scope.png`, `ui-preview.png`.
+- Backend seed IDs (`acme_corp`) remain internal only; no visible UI text.
+
+### Verification
+- `npx tsc --noEmit` -> `TSC_EXIT=0`; screenshots re-shot at 1440x900 and 390x844.
+
+---
+
 ## 2026-11-19 10:49 IST — Unify `/workspace` with `tasteskill 2.5.1` (`stone-blueprint` + `urbanist` + `sharp` + `ui-pipe` Tool Marks)
 
 ### Objective
