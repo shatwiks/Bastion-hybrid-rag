@@ -1,0 +1,304 @@
+/* Exact dealt tokens from tasteskill start.mjs css: stone-blueprint + urbanist + sharp */
+:root {
+  --p-bg: #dfdedb;
+  --p-surface: #d3d2ce;
+  --p-ink: #26251e;
+  --p-muted: #5a5850;
+  --p-accent: #2456d6;
+  --p-accent-ink: #ffffff;
+  --p-action: #2456d6;
+  --p-action-ink: #ffffff;
+  --p-inv-bg: #26251e;
+  --p-inv-surface: #313029;
+  --p-inv-ink: #dfdedb;
+  --p-inv-muted: #9e9d99;
+  --p-inv-accent: #dfdedb;
+  --p-inv-accent-ink: #26251e;
+  --p-inv-action: #dfdedb;
+  --p-inv-action-ink: #26251e;
+  --font-display: "Urbanist", system-ui, sans-serif;
+  --font-text: "Urbanist", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 500;
+  --display-tracking: -0.03em;
+  --display-tracking-xl: -0.04em;
+}
+
+/* Ensure body lead copy reads at >10:1 ink contrast on stone ground */
+.hero--centred .hero__lead { color: var(--ink); }
+
+/* High-contrast focus ring on dark hero window controls */
+.hero__window .loop-pause:focus-visible,
+.b-win .loop-pause:focus-visible {
+  outline: 2px solid #ffffff !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px #2456d6;
+}
+
+/* Hero centred window frame (sand lit ground fallback + dark app window inside) */
+.hero__window {
+  background:
+    radial-gradient(95% 75% at 20% 25%, #e9e0d2 0%, transparent 65%),
+    radial-gradient(85% 70% at 82% 80%, #c8b69d 0%, transparent 60%),
+    linear-gradient(160deg, #dfd4c3 0%, #cfc1ac 100%);
+}
+.b-win {
+  background: #17191c;
+  color: #eceef0;
+  border-radius: 12px;
+  overflow: hidden;
+  font: 400 14px/1.4 var(--font-text);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08), 0 30px 70px -30px rgb(0 0 0 / 0.72);
+  text-align: left;
+}
+.b-win__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 14px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  font-size: 13px;
+  color: #9aa0a6;
+}
+.b-win__bar b { color: #eceef0; font-weight: 500; }
+.b-win__bar .sp { flex: 1; }
+.b-win__dots { display: flex; gap: 6px; }
+.b-win__dots i { width: 10px; height: 10px; border-radius: 50%; background: #3a3e43; }
+.b-win__body { display: grid; grid-template-columns: 256px 1fr; min-height: 420px; }
+.b-inbox {
+  border-right: 1px solid rgb(255 255 255 / 0.08);
+  padding: 10px;
+  display: grid;
+  align-content: start;
+  gap: 3px;
+}
+.b-inbox .q {
+  height: 32px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.06);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  color: #8d9399;
+  font: 400 12px/1 var(--font-mono);
+}
+.b-inbox .t {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  gap: 1px 10px;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.b-inbox .t.is-on { background: rgb(255 255 255 / 0.08); }
+.b-inbox .t i {
+  grid-row: 1 / span 2;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  font: 500 11px/1 var(--font-mono);
+  font-style: normal;
+  color: #17191c;
+}
+.b-inbox .t b { font-weight: 500; color: #eceef0; }
+.b-inbox .t time { color: #8d9399; font: 400 12px/1.2 var(--font-mono); }
+.b-inbox .t span {
+  grid-column: 2 / -1;
+  color: #9aa0a6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.b-convo { display: grid; min-width: 0; align-content: start; }
+.b-chat { display: grid; gap: 8px; align-content: start; padding: 14px 18px; font-size: 13.5px; }
+.b-msg {
+  max-width: 88%;
+  padding: 9px 13px;
+  border-radius: 8px;
+  background: #23272d;
+  color: #e9ecee;
+  line-height: 1.42;
+}
+.b-msg--me {
+  justify-self: end;
+  background: #dfdedb;
+  color: #17191c;
+}
+.b-msg--bot small {
+  display: inline;
+  margin-left: 8px;
+  font: 500 12px/1 var(--font-mono);
+  color: #8cc9a8;
+  white-space: nowrap;
+}
+.b-tool {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 400 12px/1.2 var(--font-mono);
+  color: #9aa0a6;
+}
+.b-tool::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #6b93f2;
+  border-right-color: transparent;
+}
+.b-acts { display: flex; gap: 8px; }
+.b-acts span {
+  height: 28px;
+  padding: 0 11px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 12.5px;
+  font-weight: 500;
+  background: #dfdedb;
+  color: #17191c;
+}
+.b-acts span + span {
+  background: rgb(255 255 255 / 0.08);
+  color: #e9ecee;
+}
+@media (max-width: 639px) {
+  .b-win__bar .sp ~ span { display: none; }
+  .b-win__body { grid-template-columns: 1fr; }
+  .b-inbox { display: none; }
+  .b-chat { font-size: 13px; padding: 12px 14px; }
+  .b-msg--bot small, .b-tool { display: none; }
+}
+
+/* app-frame recipe (sections-library.md) */
+.app.ui {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  margin-top: var(--s-7);
+  background: var(--u-bg);
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-r);
+  box-shadow: var(--u-shadow);
+}
+.app > .app__pane {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.app > .app__pane + .app__pane { border-left: 1px solid var(--u-line); }
+.app > .app__pane > .ui-panel {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.app > .app__pane::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 64px;
+  background: linear-gradient(transparent, var(--u-bg));
+  pointer-events: none;
+}
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .app.ui { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); }
+}
+@media (max-width: 1023px) {
+  .app.ui {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .app > .app__pane--list { max-height: 252px; }
+  .app > .app__pane--list::after { display: none; }
+  .app .ui-win__side { display: none; }
+  .app .ui-win__body { grid-template-columns: minmax(0, 1fr); }
+  .app > .app__pane + .app__pane {
+    border-left: 0;
+    border-top: 1px solid var(--u-line);
+  }
+}
+@media (max-width: 639px) {
+  .app.ui { grid-template-rows: minmax(0, 1fr); }
+  .app > .app__pane--list { display: none; }
+  .app > .app__pane + .app__pane { border-top: 0; }
+}
+
+/* features-2x2 panel heights tuned across all viewports */
+#engine .panel { --p-h: 296px; }
+#engine .panel--dg { background: var(--g-alt); }
+@media (min-width: 1024px) and (max-width: 1279px) {
+  #engine .panel { --p-h: 230px; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  #engine { --h: 2; }
+  #engine .panel { --p-h: 240px; }
+}
+@media (max-width: 639px) {
+  #engine .panel,
+  #engine .panel--dg { --p-h: 182px; }
+  #engine .ui-chat__day { display: none; }
+  #engine .stage { --fade-h: 40px; }
+}
+
+/* Benchmarks split: spec rows left, stat panel right */
+#benchmarks .rows { margin-top: var(--s-2); }
+#benchmarks .bench-panel { --p-h: 360px; align-self: start; }
+@media (max-width: 1023px) {
+  #benchmarks .grid { row-gap: var(--s-6); }
+  #benchmarks .bench-panel { --p-h: 300px; }
+}
+@media (max-width: 639px) {
+  #benchmarks .bench-panel { --p-h: 236px; }
+  #benchmarks .rows > li { padding-block: var(--s-3); }
+}
+
+/* Stack icons block inside #questions (real 28x28 full-colour tool marks, 2 columns so zero cut-text) */
+.stack-icons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3);
+  margin-top: var(--s-4);
+  max-width: 340px;
+}
+.stack-icon-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  background: #ffffff;
+  border: 1px solid var(--line);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.stack-icon-tile img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex: none;
+}
+
+/* Keep FAQ compact enough to match sibling section rhythm */
+#questions .faq__item { padding-block: var(--s-4); }
+@media (max-width: 639px) {
+  .stack-icons { margin-top: var(--s-2); gap: var(--s-2); }
+  .stack-icon-tile { padding: 8px 12px; }
+  #questions .faq__item { padding-block: 10px; }
+}
+
+/* Pinned chapters screenshot framing */
+#walkthrough .mo-pc__visual > img {
+  object-fit: cover;
+  object-position: top left;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+/* Nav mega card height */
+.menu-card .panel { --p-h: 160px; }

@@ -110,13 +110,19 @@ export function PersonaBar({
         <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2.5 sm:gap-3.5">
           {/* Wordmark & System Health */}
           <div className="flex items-center gap-2.5 pr-3 sm:border-r sm:border-[var(--shell-rule)]">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[var(--copper)] text-[#FCFBF8]">
-              <ShieldCheck className="h-4 w-4" strokeWidth={2} />
-            </span>
-            <div className="flex items-center gap-2 leading-none">
+            <a
+              href="/"
+              title="Back to Bastion overview"
+              className="flex items-center gap-2.5 rounded hover:opacity-90 transition-opacity"
+            >
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[var(--copper)] text-[#FCFBF8]">
+                <ShieldCheck className="h-4 w-4" strokeWidth={2} />
+              </span>
               <span className="text-[15px] font-semibold tracking-tight text-[var(--shell-ink)]">
                 Bastion
               </span>
+            </a>
+            <div className="flex items-center gap-2 leading-none">
               <span
                 className="inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 text-[11px] font-medium"
                 style={{
