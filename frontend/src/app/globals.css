@@ -1,36 +1,37 @@
 @import "tailwindcss";
 
 :root {
-  /* Limestone Atelier palette */
-  --shell-bg: #133136;
-  --shell-surface: #1b4046;
-  --shell-surface-active: #23525a;
-  --shell-rule: #28565e;
-  --shell-ink: #f4f2ec;
-  --shell-muted: #9eb7ba;
+  /* tasteskill 2.5.1 dealt palette: stone-blueprint + urbanist + sharp */
+  --shell-bg: #26251e;
+  --shell-surface: #313029;
+  --shell-surface-active: #3c3b33;
+  --shell-rule: #434139;
+  --shell-ink: #dfdedb;
+  --shell-muted: #9e9d99;
 
-  --ground: #f2f0ea;
-  --mineral: #e7e3d9;
-  --paper: #fcfbf8;
-  --rule: #d7d2c6;
-  --rule-strong: #beb8aa;
+  --ground: #dfdedb;
+  --mineral: #d3d2ce;
+  --paper: #ffffff;
+  --rule: #c7c6c0;
+  --rule-strong: #aba9a1;
 
-  --ink: #162124;
-  --ink-secondary: #465558;
-  --ink-muted: #5f6e71;
+  --ink: #26251e;
+  --ink-secondary: #434139;
+  --ink-muted: #5a5850;
 
-  --copper: #b55228;
-  --copper-hover: #99421d;
-  --copper-soft: #faf0eb;
-  --copper-rule: #e6c2b2;
+  /* Blueprint cobalt accent (--p-accent: #2456d6) */
+  --copper: #2456d6;
+  --copper-hover: #1c46b5;
+  --copper-soft: #eef2fc;
+  --copper-rule: #bfd0f7;
 
-  --jade: #116b4f;
-  --jade-soft: #eaf5f0;
-  --jade-rule: #b4dccb;
+  --jade: #136c48;
+  --jade-soft: #eaf5ef;
+  --jade-rule: #b3dcc8;
 
-  --crimson: #a82828;
-  --crimson-soft: #fdefef;
-  --crimson-rule: #e8bdbd;
+  --crimson: #b42318;
+  --crimson-soft: #fef3f2;
+  --crimson-rule: #fecdca;
 
   --ochre: #8f5609;
   --ochre-soft: #faf4e8;
@@ -38,8 +39,8 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: var(--font-sans), "Urbanist", system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono), "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 * {
@@ -52,11 +53,31 @@ body {
   background-color: var(--ground);
   color: var(--ink);
   caret-color: var(--copper);
+  letter-spacing: -0.005em;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.025em;
+}
+
+/* Dealt ring brand mark from tasteskill system.css */
+.taste-mark-ring {
+  display: inline-block;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm0 5.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm0 5.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
 }
 
 ::selection {
-  background-color: #eed6ca;
-  color: #162124;
+  background-color: #cddbf9;
+  color: #26251e;
 }
 
 :focus-visible {
@@ -68,7 +89,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Subtle custom scrollbar matching limestone palette */
+/* Subtle custom scrollbar matching stone-blueprint palette */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -79,12 +100,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cdc7ba;
-  border-radius: 4px;
+  background: #bab8b0;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b2ab9b;
+  background: #9e9c94;
 }
 
 @media (prefers-reduced-motion: reduce) {

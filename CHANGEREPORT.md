@@ -1,5 +1,26 @@
 # Change Report
 
+## 2026-11-19 10:49 IST — Unify `/workspace` with `tasteskill 2.5.1` (`stone-blueprint` + `urbanist` + `sharp` + `ui-pipe` Tool Marks)
+
+### Objective
+Apply the dealt `tasteskill 2.5.1` design system (`stone-blueprint` palette, `Urbanist` + `DM Mono` typography, `sharp` radius scale, dealt `ring` brand mark, and `ui-pipe` / `ui-win` visual grammar with real full-colour tool icons and a live execution terminal log) to the interactive RAG workspace at `/workspace`.
+
+### Files Modified
+- `frontend/src/app/(workspace)/layout.tsx` — Switched workspace fonts to `Urbanist` + `DM Mono`, set `data-type="software"` and `data-radius="sharp"`, and linked `/favicon.svg`.
+- `frontend/src/app/globals.css` — Replaced Limestone Atelier CSS tokens with the dealt `tasteskill 2.5.1` `stone-blueprint` tokens (`--ground: #dfdedb`, `--mineral: #d3d2ce`, `--paper: #ffffff`, `--ink: #26251e`, `--shell-bg: #26251e`, `--copper: #2456d6` blueprint cobalt) and added `.taste-mark-ring`.
+- `frontend/src/components/PersonaBar.tsx` — Added dealt `ring` mark (`taste-mark-ring`), `Bastion / workspace` breadcrumb, `← Overview` link to `/`, and `stone-blueprint` inverse dark segmented switchers.
+- `frontend/src/components/ChatViewport.tsx` — Added `.b-win__bar` / `.ui-win__bar` window sub-bar (`acme_corp · support_tier_1`, `scope_hash`, `pgvector HNSW · Dual-FTS · 0.65 Gate`).
+- `frontend/src/components/TelemetryInspectorDrawer.tsx` — Styled inspector header after `ui-pipe__head` (`bastion/rag / acme_corp #f51251`), added real full-colour tool icons on `22×22` light tiles (`FastAPI`, `Redis`, `PostgreSQL`, `Python`, `Ollama`, `Docker`) to all 6 stages, and added a live `$` terminal execution log strip (`ui-pipe__log`).
+- `frontend/src/components/CitationPopover.tsx` & `frontend/src/components/AdminIngestionModal.tsx` — Aligned modal backdrops and borders with `stone-blueprint` and `sharp` radius tokens.
+- `frontend/public/assets/chapter-scope.png`, `frontend/public/assets/ui-preview.png`, `docs/assets/ui-desktop.png`, `docs/assets/ui-mobile.png` — Refreshed live Chromium screenshots at `1440×900` and `390×844`.
+
+### Verification Commands & Results
+- **TypeScript & Route Typegen:** `cd frontend; npx next typegen; npx tsc --noEmit` -> `TSC_EXIT=0`
+- **XSS Audit:** `XSS_COUNT=0`
+- **Live Screenshots (`shoot.mjs`):** Captured and visually verified `1440×900` and `390×844` views of `http://localhost:3005/workspace`.
+
+---
+
 ## 2026-11-19 10:35 IST — Bastion Hybrid RAG Product Landing Page (`/`) & Live Workspace Route (`/workspace`) (`tasteskill 2.5.1`)
 
 ### Objective

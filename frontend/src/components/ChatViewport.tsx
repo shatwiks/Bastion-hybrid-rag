@@ -180,6 +180,31 @@ export function ChatViewport({
       aria-label="Interactive RAG Chat Viewport"
       className="flex h-full min-h-[540px] min-w-0 flex-col bg-[var(--paper)]"
     >
+      {/* Window Sub-bar (tasteskill b-win__bar / ui-win__bar grammar) */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--rule)] bg-[var(--mineral)]/55 px-5 py-2.5 text-xs sm:px-8">
+        <div className="flex items-center gap-2.5">
+          <span className="flex items-center gap-1.5" aria-hidden="true">
+            <i className="h-2.5 w-2.5 rounded-full bg-[var(--rule-strong)]" />
+            <i className="h-2.5 w-2.5 rounded-full bg-[var(--rule-strong)]" />
+            <i className="h-2.5 w-2.5 rounded-full bg-[var(--rule-strong)]" />
+          </span>
+          <span className="font-mono text-[11.5px] text-[var(--ink-secondary)]">
+            <strong className="font-medium text-[var(--ink)]">
+              {session?.tenant_id ?? "acme_corp"}
+            </strong>{" "}
+            · {session?.persona ?? "support_tier_1"}
+          </span>
+          {session && (
+            <span className="hidden rounded-[3px] border border-[var(--rule)] bg-[var(--paper)] px-1.5 py-0.5 font-mono text-[10.5px] text-[var(--ink-muted)] sm:inline">
+              scope:{session.scope_hash.slice(0, 8)}
+            </span>
+          )}
+        </div>
+        <span className="font-mono text-[11px] text-[var(--ink-muted)]">
+          pgvector HNSW · Dual-FTS · 0.65 Gate
+        </span>
+      </div>
+
       {/* Conversation Thread / Empty State */}
       <div className="min-w-0 flex-1 overflow-y-auto px-5 py-6 sm:px-8">
         {turns.length === 0 ? (

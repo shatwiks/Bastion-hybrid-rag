@@ -22,36 +22,50 @@ const STAGE_DEFINITIONS: Array<{
   step: 1 | 2 | 3 | 4 | 5 | 6;
   name: string;
   title: string;
+  icon: string;
+  cmd: string;
 }> = [
   {
     step: 1,
     name: "auth_guardrail",
     title: "Auth & Pre-Retrieval RBAC",
+    icon: "/assets/icons/fastapi.svg",
+    cmd: "PyJWT SecurityContext",
   },
   {
     step: 2,
     name: "semantic_cache",
     title: "Permission-Scoped Redis Cache",
+    icon: "/assets/icons/redis.svg",
+    cmd: "RedisVL Tag Filter",
   },
   {
     step: 3,
     name: "hybrid_retrieval",
     title: "Query Rewrite & Hybrid RRF",
+    icon: "/assets/icons/postgres.svg",
+    cmd: "WHERE tenant_id AND roles",
   },
   {
     step: 4,
     name: "rerank_gate",
     title: "Cross-Encoder & Refusal Gate",
+    icon: "/assets/icons/python.svg",
+    cmd: "Sigmoid >= 0.65 Gate",
   },
   {
     step: 5,
     name: "grounded_generation",
     title: "Grounded Generation",
+    icon: "/assets/icons/ollama.svg",
+    cmd: "SSE [chunk_id] Stream",
   },
   {
     step: 6,
     name: "telemetry_commit",
     title: "Langfuse Trace & Cache Commit",
+    icon: "/assets/icons/docker.svg",
+    cmd: "Async OTel Commit",
   },
 ];
 
@@ -203,27 +217,33 @@ export function TelemetryInspectorDrawer({
       aria-label="6-Step Pipeline Telemetry Inspector"
       className="flex h-full min-h-[540px] min-w-0 flex-col bg-[var(--ground)]"
     >
-      {/* Inspector Header */}
-      <div className="flex items-center justify-between gap-3 border-b border-[var(--rule)] px-5 py-3.5">
+      {/* Inspector Header (tasteskill ui-pipe__head grammar) */}
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--rule)] bg-[var(--mineral)]/55 px-5 py-3">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 shrink-0 text-[var(--copper)]" />
-            <h2 className="truncate text-sm font-semibold text-[var(--ink)]">
-              6-Step Pipeline Telemetry
-            </h2>
+          <div className="flex items-center gap-2 text-xs">
+            <Activity className="h-3.5 w-3.5 shrink-0 text-[var(--copper)]" />
+            <span className="font-semibold text-[var(--ink)]">bastion/rag</span>
+            <span className="text-[var(--ink-muted)]">/</span>
+            <code className="rounded-[3px] border border-[var(--rule)] bg-[var(--paper)] px-1.5 py-0.5 font-mono text-[11px] font-medium text-[var(--ink)]">
+              {turn?.tenant_id ?? session?.tenant_id ?? "acme_corp"}
+            </code>
+            <span className="hidden font-mono text-[11px] text-[var(--ink-muted)] sm:inline">
+              #{(turn?.scope_hash ?? session?.scope_hash ?? "pending").slice(0, 6)}
+            </span>
           </div>
           <p className="mt-0.5 truncate font-mono text-[11px] text-[var(--ink-muted)]">
+            6-Step Pipeline Telemetry ·{" "}
             {turn
-              ? `${turn.tenant_id} / ${turn.persona}`
+              ? `${turn.persona} (${turn.allowed_roles.join(", ")})`
               : session
-              ? `Ready · ${session.tenant_id} / ${session.persona}`
+              ? `Ready · ${session.persona}`
               : "Awaiting security context"}
           </p>
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
           {typeof turn?.totalLatencyMs === "number" && (
-            <span className="rounded border border-[var(--rule)] bg-[var(--paper)] px-2 py-0.5 font-mono text-[11px] tabular-nums font-medium text-[var(--ink)]">
+            <span className="rounded-[3px] border border-[var(--rule)] bg-[var(--paper)] px-2 py-0.5 font-mono text-[11px] tabular-nums font-medium text-[var(--ink)]">
               {turn.totalLatencyMs.toFixed(1)} ms
             </span>
           )}
@@ -232,7 +252,7 @@ export function TelemetryInspectorDrawer({
             onClick={onCollapse}
             aria-label="Collapse telemetry inspector drawer"
             title="Collapse Inspector"
-            className="rounded border border-[var(--rule)] bg-[var(--paper)] p-1.5 text-[var(--ink-secondary)] transition-colors hover:border-[var(--rule-strong)] hover:text-[var(--ink)] cursor-pointer"
+            className="rounded-[3px] border border-[var(--rule)] bg-[var(--paper)] p-1.5 text-[var(--ink-secondary)] transition-colors hover:border-[var(--rule-strong)] hover:text-[var(--ink)] cursor-pointer"
           >
             <PanelRightClose className="h-3.5 w-3.5" />
           </button>
@@ -241,7 +261,7 @@ export function TelemetryInspectorDrawer({
 
       {/* Scrollable Telemetry Rail */}
       <div className="min-w-0 flex-1 overflow-y-auto px-5 py-4">
-        {/* 6-Step Hairline Transit Rail */}
+        {/* 6-Step Hairline Transit Rail with Real Tool Marks on Light Tiles */}
         <ol className="divide-y divide-[var(--rule)] border-t border-b border-[var(--rule)]">
           {STAGE_DEFINITIONS.map((stage) => {
             const liveStep = stepMap.get(stage.step);
@@ -258,9 +278,9 @@ export function TelemetryInspectorDrawer({
             return (
               <li key={stage.step} className="py-3">
                 <div className="flex items-center justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-2.5">
+                  <div className="flex min-w-0 items-center gap-2">
                     <span
-                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-xs font-mono text-[11px] font-semibold tabular-nums"
+                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] font-mono text-[10.5px] font-semibold tabular-nums"
                       style={{
                         backgroundColor: style.numBg,
                         color: style.numInk,
@@ -268,19 +288,33 @@ export function TelemetryInspectorDrawer({
                     >
                       {stage.step}
                     </span>
+                    <span
+                      className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[4px] border border-[var(--rule)] bg-white p-0.5"
+                      aria-hidden="true"
+                    >
+                      <img
+                        src={stage.icon}
+                        alt=""
+                        className="h-3.5 w-3.5 object-contain"
+                      />
+                    </span>
                     <span className="truncate text-[13px] font-semibold text-[var(--ink)]">
                       {stage.title}
                     </span>
                   </div>
 
                   <div className="flex shrink-0 items-center gap-2">
-                    {typeof liveStep?.latency_ms === "number" && (
+                    {typeof liveStep?.latency_ms === "number" ? (
                       <span className="font-mono text-[11px] tabular-nums text-[var(--ink-muted)]">
                         {liveStep.latency_ms.toFixed(1)} ms
                       </span>
+                    ) : (
+                      <code className="hidden font-mono text-[10.5px] text-[var(--ink-muted)] xl:inline">
+                        {stage.cmd}
+                      </code>
                     )}
                     <span
-                      className="rounded-xs border px-1.5 py-0.5 text-[10.5px] font-medium"
+                      className="rounded-[3px] border px-1.5 py-0.5 text-[10.5px] font-medium"
                       style={{
                         color: style.textColor,
                         backgroundColor: style.bgColor,
@@ -537,6 +571,55 @@ export function TelemetryInspectorDrawer({
             );
           })}
         </ol>
+
+        {/* Live Terminal Execution Log (tasteskill ui-pipe__log) */}
+        <div
+          className="mt-4 rounded-[4px] border border-[var(--shell-rule)] bg-[#17191c] px-3.5 py-2.5 font-mono text-[11px] leading-[1.6] text-[#9aa0a6]"
+          aria-label="Live pipeline execution trace log"
+        >
+          <div className="truncate">
+            <b className="mr-1.5 text-[#6b93f2]">$</b>
+            verify HS256 JWT -&gt;{" "}
+            <span className="text-[#eceef0]">
+              {String(step1?.details.tenant_id ?? session?.tenant_id ?? "acme_corp")}
+            </span>{" "}
+            scope_hash=
+            {String(step1?.details.scope_hash ?? session?.scope_hash ?? "pending").slice(
+              0,
+              12
+            )}
+          </div>
+          {step2 && (
+            <div className="truncate">
+              <b className="mr-1.5 text-[#6b93f2]">$</b>
+              SCAN llm_cache:{turn?.tenant_id}:
+              {(turn?.scope_hash ?? "").slice(0, 8)} -&gt;{" "}
+              <span className={cacheHit ? "text-[#8cc9a8]" : "text-[#eceef0]"}>
+                {cacheHit ? "CACHE_HIT" : cacheBypassed ? "BYPASSED" : "CACHE_MISS"}
+              </span>
+            </div>
+          )}
+          {step3 && step3.status !== "skipped" && (
+            <div className="truncate">
+              <b className="mr-1.5 text-[#6b93f2]">$</b>
+              WHERE tenant_id AND allowed_roles -&gt;{" "}
+              <span className="text-[#eceef0]">
+                {Number(step3.details.candidate_count ?? funnelRows.length)} RRF
+                candidates
+              </span>
+            </div>
+          )}
+          {topRerankScore !== null && (
+            <div className="truncate">
+              <b className="mr-1.5 text-[#6b93f2]">$</b>
+              CrossEncoder top_score={topRerankScore.toFixed(4)} vs{" "}
+              {threshold.toFixed(2)} -&gt;{" "}
+              <span className={passesGate ? "text-[#8cc9a8]" : "text-[#f29b9b]"}>
+                {passesGate ? "PASS" : "REFUSED (0 LLM tokens)"}
+              </span>
+            </div>
+          )}
+        </div>
 
         {/* Collapsible Candidate Funnel Table (Top-25 RRF -> Top-5 Cross-Encoder) */}
         <div className="mt-5">

@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import {
+  ArrowLeft,
   PanelRightClose,
   PanelRightOpen,
   RefreshCw,
-  ShieldCheck,
   Upload,
 } from "lucide-react";
 
@@ -108,27 +108,37 @@ export function PersonaBar({
       <div className="mx-auto flex w-full max-w-[1680px] min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-2.5 px-4 py-2.5 lg:px-6">
         {/* Left: Brand Identity + Segmented Tenant & Role Switchers */}
         <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2.5 sm:gap-3.5">
-          {/* Wordmark & System Health */}
+          {/* Wordmark & System Health (tasteskill ring mark + ui-win__crumb) */}
           <div className="flex items-center gap-2.5 pr-3 sm:border-r sm:border-[var(--shell-rule)]">
             <a
               href="/"
-              title="Back to Bastion overview"
-              className="flex items-center gap-2.5 rounded hover:opacity-90 transition-opacity"
+              title="Back to Bastion product landing page"
+              className="flex items-center gap-2 rounded hover:opacity-90 transition-opacity"
             >
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[var(--copper)] text-[#FCFBF8]">
-                <ShieldCheck className="h-4 w-4" strokeWidth={2} />
-              </span>
-              <span className="text-[15px] font-semibold tracking-tight text-[var(--shell-ink)]">
+              <span
+                className="taste-mark-ring text-[#6b93f2]"
+                aria-hidden="true"
+              />
+              <span className="text-[19px] font-medium tracking-[-0.025em] text-[var(--shell-ink)]">
                 Bastion
               </span>
             </a>
+            <span className="text-xs text-[var(--shell-rule)]" aria-hidden="true">
+              /
+            </span>
+            <span className="font-mono text-xs font-medium text-[var(--shell-muted)]">
+              workspace
+            </span>
             <div className="flex items-center gap-2 leading-none">
               <span
-                className="inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 text-[11px] font-medium"
+                className="inline-flex items-center gap-1.5 rounded-[3px] border px-1.5 py-0.5 font-mono text-[11px] font-medium"
                 style={{
                   backgroundColor: isHealthy
-                    ? "rgba(74, 222, 128, 0.14)"
-                    : "rgba(255, 255, 255, 0.08)",
+                    ? "rgba(92, 224, 168, 0.1)"
+                    : "rgba(255, 255, 255, 0.06)",
+                  borderColor: isHealthy
+                    ? "rgba(92, 224, 168, 0.28)"
+                    : "var(--shell-rule)",
                   color: isHealthy ? "#9CE7C6" : "var(--shell-muted)",
                 }}
                 title={
@@ -140,7 +150,7 @@ export function PersonaBar({
                 <span
                   className="h-1.5 w-1.5 rounded-full"
                   style={{
-                    backgroundColor: isHealthy ? "#5CE0A8" : "#9EB7BA",
+                    backgroundColor: isHealthy ? "#5CE0A8" : "#9E9D99",
                   }}
                 />
                 {isHealthy ? "Live" : "Checking"}
@@ -152,7 +162,7 @@ export function PersonaBar({
           <div
             role="group"
             aria-label="Select tenant"
-            className="inline-flex max-w-full items-center rounded border border-[var(--shell-rule)] bg-[#0E262A] p-0.5"
+            className="inline-flex max-w-full items-center rounded-[4px] border border-[var(--shell-rule)] bg-[#1b1a15] p-0.5"
           >
             {TENANT_OPTIONS.map((tenant) => {
               const isSelected = activeTenant === tenant.id;
@@ -165,7 +175,7 @@ export function PersonaBar({
                   onClick={() => handleSwitch(tenant.id, activePersona)}
                   className={`rounded-[3px] px-2.5 py-1 text-xs font-medium transition-colors duration-150 cursor-pointer disabled:opacity-50 ${
                     isSelected
-                      ? "bg-[var(--paper)] text-[var(--ink)] shadow-xs"
+                      ? "bg-[var(--ground)] text-[var(--ink)]"
                       : "text-[var(--shell-muted)] hover:text-[var(--shell-ink)]"
                   }`}
                 >
@@ -179,7 +189,7 @@ export function PersonaBar({
           <div
             role="group"
             aria-label="Select RBAC role persona"
-            className="inline-flex max-w-full flex-wrap items-center rounded border border-[var(--shell-rule)] bg-[#0E262A] p-0.5"
+            className="inline-flex max-w-full flex-wrap items-center rounded-[4px] border border-[var(--shell-rule)] bg-[#1b1a15] p-0.5"
           >
             {PERSONA_OPTIONS.map((persona) => {
               const isSelected = activePersona === persona.id;
@@ -193,7 +203,7 @@ export function PersonaBar({
                   onClick={() => handleSwitch(activeTenant, persona.id)}
                   className={`rounded-[3px] px-2.5 py-1 text-xs font-medium transition-colors duration-150 cursor-pointer disabled:opacity-50 ${
                     isSelected
-                      ? "bg-[var(--copper)] text-[#FCFBF8]"
+                      ? "bg-[var(--copper)] text-white"
                       : "text-[var(--shell-muted)] hover:text-[var(--shell-ink)]"
                   }`}
                 >
@@ -209,22 +219,31 @@ export function PersonaBar({
           {/* Active JWT Scope Readout */}
           {session && (
             <div
-              className="hidden items-center gap-2 rounded border border-[var(--shell-rule)] bg-[#0E262A] px-2.5 py-1 text-[11px] xl:flex"
+              className="hidden items-center gap-2 rounded-[4px] border border-[var(--shell-rule)] bg-[#1b1a15] px-2.5 py-1 text-[11px] xl:flex"
               title={`Tenant: ${session.tenant_id} · Allowed roles: ${session.allowed_roles.join(", ")} · Scope hash: ${session.scope_hash}`}
             >
               <span className="font-mono text-[var(--shell-muted)]">
                 {session.tenant_id}
               </span>
               <span className="text-[var(--shell-rule)]">/</span>
-              <span className="font-mono text-[#D5E4E6]">
+              <span className="font-mono text-[var(--shell-ink)]">
                 {session.allowed_roles.join(", ")}
               </span>
               <span className="text-[var(--shell-rule)]">·</span>
-              <span className="font-mono tabular-nums text-[#8FD4BE]">
+              <span className="font-mono tabular-nums text-[#8cc9a8]">
                 {session.scope_hash.slice(0, 12)}
               </span>
             </div>
           )}
+
+          {/* Overview Link */}
+          <a
+            href="/"
+            className="inline-flex h-8 items-center gap-1.5 rounded-[4px] border border-[var(--shell-rule)] bg-[var(--shell-surface)] px-2.5 text-xs font-medium text-[var(--shell-ink)] transition-colors duration-150 hover:bg-[var(--shell-surface-active)]"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span className="hidden md:inline">Overview</span>
+          </a>
 
           {/* Re-run Last Query */}
           <button
@@ -236,12 +255,12 @@ export function PersonaBar({
                 ? `Re-run "${lastQuery}" under ${activeTenant} / ${activePersona}`
                 : "Ask a question first to re-run under another role"
             }
-            className="inline-flex h-8 items-center gap-1.5 rounded border border-[var(--shell-rule)] bg-[var(--shell-surface)] px-2.5 text-xs font-medium text-[var(--shell-ink)] transition-colors duration-150 hover:bg-[var(--shell-surface-active)] active:translate-y-px cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-8 items-center gap-1.5 rounded-[4px] border border-[var(--shell-rule)] bg-[var(--shell-surface)] px-2.5 text-xs font-medium text-[var(--shell-ink)] transition-colors duration-150 hover:bg-[var(--shell-surface-active)] active:translate-y-px cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${isMinting ? "animate-spin" : ""}`}
             />
-            <span className="hidden sm:inline">Re-run Last Query Under New Role</span>
+            <span className="hidden sm:inline">Re-run Under Role</span>
             <span className="sm:hidden">Re-run</span>
           </button>
 
@@ -249,7 +268,7 @@ export function PersonaBar({
           <button
             type="button"
             onClick={onOpenAdminModal}
-            className="inline-flex h-8 items-center gap-1.5 rounded border border-[var(--shell-rule)] bg-[var(--shell-surface)] px-2.5 text-xs font-medium text-[var(--shell-ink)] transition-colors duration-150 hover:bg-[var(--shell-surface-active)] active:translate-y-px cursor-pointer"
+            className="inline-flex h-8 items-center gap-1.5 rounded-[4px] border border-[var(--shell-rule)] bg-[var(--shell-surface)] px-2.5 text-xs font-medium text-[var(--shell-ink)] transition-colors duration-150 hover:bg-[var(--shell-surface-active)] active:translate-y-px cursor-pointer"
           >
             <Upload className="h-3.5 w-3.5" />
             <span>Admin Ingestion</span>
@@ -266,9 +285,9 @@ export function PersonaBar({
                   ? "Collapse Telemetry Inspector"
                   : "Expand Telemetry Inspector"
               }
-              className={`inline-flex h-8 items-center gap-1.5 rounded border px-2.5 text-xs font-medium transition-colors duration-150 cursor-pointer ${
+              className={`inline-flex h-8 items-center gap-1.5 rounded-[4px] border px-2.5 text-xs font-medium transition-colors duration-150 cursor-pointer ${
                 isInspectorOpen
-                  ? "border-[#D7D2C6]/30 bg-[var(--paper)] text-[var(--ink)]"
+                  ? "border-transparent bg-[var(--ground)] text-[var(--ink)]"
                   : "border-[var(--shell-rule)] bg-[var(--shell-surface)] text-[var(--shell-ink)] hover:bg-[var(--shell-surface-active)]"
               }`}
             >
@@ -285,11 +304,11 @@ export function PersonaBar({
 
       {/* Compact Mobile Scope Strip (visible below xl) */}
       {session && (
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--shell-rule)]/70 bg-[#0E262A] px-4 py-1 text-[11px] text-[var(--shell-muted)] xl:hidden">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--shell-rule)]/70 bg-[#1b1a15] px-4 py-1 text-[11px] text-[var(--shell-muted)] xl:hidden">
           <span className="truncate font-mono">
             {session.tenant_id} · {session.allowed_roles.join(", ")}
           </span>
-          <span className="font-mono tabular-nums text-[#8FD4BE]">
+          <span className="font-mono tabular-nums text-[#8cc9a8]">
             scope:{session.scope_hash}
           </span>
         </div>

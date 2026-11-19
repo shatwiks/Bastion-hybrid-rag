@@ -192,14 +192,14 @@ export function AdminIngestionModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#133136]/45 p-3 sm:p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#26251e]/50 p-3 sm:p-4 backdrop-blur-[2px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="admin-ingestion-title"
       onClick={onClose}
     >
       <div
-        className="flex max-h-[92vh] w-full max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-md border border-[var(--rule-strong)] bg-[var(--paper)] shadow-[0_24px_60px_-16px_rgba(19,49,54,0.35)] sm:max-w-5xl"
+        className="flex max-h-[92vh] w-full max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-[6px] border border-[var(--rule-strong)] bg-[var(--paper)] shadow-[0_24px_60px_-20px_rgba(38,37,30,0.45)] sm:max-w-5xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
