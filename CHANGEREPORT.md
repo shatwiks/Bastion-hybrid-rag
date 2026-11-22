@@ -1,5 +1,20 @@
 # Change Report
 
+## 2026-11-22 07:10 IST — Pre-LinkedIn Production Security Hardening
+
+### Objective
+Harden public repository, API middleware, authentication, CORS, error handling, and CI workflow permissions prior to public LinkedIn sharing.
+
+### Files Modified & Created
+- `backend/app/config.py` — Added explicit `CORS_ORIGINS` allowlist, `ENABLE_DOCS` toggle, and fail-closed production validator rejecting default/weak `JWT_SECRET_KEY` and wildcard `*` CORS.
+- `backend/app/main.py` — Removed wildcard `*` from `allow_origins` with credentials, narrowed `allow_methods`/`allow_headers`, disabled docs in production unless `ENABLE_DOCS=true`, added HTTP security headers middleware + prod HSTS, and added sanitized global `500` exception handler.
+- `SECURITY.md` — Added responsible vulnerability disclosure policy.
+
+### Verification Results
+- `python -m py_compile backend/app/config.py backend/app/main.py` (PASS).
+
+---
+
 ## 2026-11-19 18:10 IST — Make the UI generic (remove Acme Corp / Globex Corp tenant switcher)
 
 ### Objective

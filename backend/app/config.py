@@ -1,5 +1,7 @@
 from functools import lru_cache
+from typing import List, Union
 
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -7,6 +9,15 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Enterprise Multi-Tenant RAG Knowledge Engine"
     VERSION: str = "1.0.0"
     ENVIRONMENT: str = "development"
+    ENABLE_DOCS: bool = True
+
+    # CORS (no wildcard '*' permitted in production)
+    CORS_ORIGINS: Union[List[str], str] = [
+        "http://localhost:3000",
+        "http://localhost:3005",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3005",
+    ]
 
     # Ports
     BACKEND_PORT: int = 8000
@@ -42,6 +53,23 @@ class Settings(BaseSettings):
     LANGFUSE_PUBLIC_KEY: str | None = None
     LANGFUSE_SECRET_KEY: str | None = None
     LANGFUSE_HOST: str = "https://cloud.langfuse.com"
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str):
+            return [o.strip().rstrip("/") for o in v.split(",") if o.strip()]
+        return [str(o).strip().rstrip("/") for o in v if str(o).strip()]
+
+    @model_validator(mode="after")
+    def validate_production_security(self) -> "Settings":
+        if (self.ENVIRONMENT or "").lower() == "production":
+            default_secret = "enterprise_super_secret_jwt_signing_key_replace_in_prod_32chars"
+            if not self.JWT_SECRET_KEY or self.JWT_SECRET_KEY == default_secret or len(self.JWT_SECRET_KEY) < 32:
+                raise ValueError("CRITICAL SECURITY VIOLATION: Default or weak JWT_SECRET_KEY detected in production.")
+            if "*" in self.CORS_ORIGINS:
+                raise ValueError("CRITICAL SECURITY VIOLATION: Wildcard '*' CORS origin is forbidden in production.")
+        return self
 
     model_config = SettingsConfigDict(
         env_file=".env",
